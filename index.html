@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>Gamified Industry Exhibition — Interactive Iran Map</title>
+		<style>
+			:root {
+				--bg: #071022; /* dark deep */
+				--panel: #0f1724cc;
+				--accent: #6ee7b7;
+				--accent-2: #7c5cff;
+				--muted: #9aa8b2;
+				--glass: rgba(255, 255, 255, 0.04);
+				--neon: 0 0 16px rgba(124, 92, 255, 0.22),
+					0 0 40px rgba(110, 231, 183, 0.06);
+				--ui-size: 56px;
+			}
+			html,
+			body {
+				height: 100%;
+				margin: 0;
+				font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+					"Segoe UI", Roboto, "Helvetica Neue", Arial;
+			}
+			body {
+				background: radial-gradient(
+						circle at 10% 10%,
+						rgba(124, 92, 255, 0.06),
+						transparent 10%
+					),
+					linear-gradient(180deg, #04101a 0%, var(--bg) 60%);
+				color: #dfe9f2;
+				overflow: hidden;
+			}
+
+			#stars {
+				position: fixed;
+				left: 0;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				pointer-events: none;
+				mix-blend-mode: screen;
+				opacity: 0.5;
+			}
+
+			.app {
+				height: 100%;
+				display: grid;
+				grid-template-columns: 1fr;
+				align-items: center;
+				justify-items: center;
+				padding: 28px;
+			}
+
+			.controls {
+				position: fixed;
+				right: 22px;
+				top: 22px;
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+				z-index: 60;
+			}
+			.toggle-group {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				align-items: flex-end;
+			}
+
+			.btn {
+				width: var(--ui-size);
+				height: var(--ui-size);
+				display: inline-grid;
+				place-items: center;
+				border-radius: 12px;
+				background: linear-gradient(
+					180deg,
+					rgba(255, 255, 255, 0.03),
+					rgba(255, 255, 255, 0.01)
+				);
+				backdrop-filter: blur(6px);
+				box-shadow: var(--neon);
+				border: 1px solid rgba(255, 255, 255, 0.04);
+				cursor: pointer;
+			}
+			.btn svg {
+				width: 22px;
+				height: 22px;
+				opacity: 0.95;
+			}
+			.btn:active {
+				transform: translateY(2px) scale(0.99);
+			}
+			.group-toggle {
+				padding: 8px 12px;
+				border-radius: 999px;
+				background: linear-gradient(
+					90deg,
+					rgba(255, 255, 255, 0.02),
+					rgba(255, 255, 255, 0.01)
+				);
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				display: flex;
+				gap: 8px;
+				align-items: center;
+			}
+
+			.viewport {
+				width: 100%;
+				max-width: 1400px;
+				height: 78vh;
+				background: linear-gradient(
+					180deg,
+					rgba(12, 20, 30, 0.35),
+					rgba(6, 10, 14, 0.4)
+				);
+				border-radius: 18px;
+				padding: 18px;
+				box-shadow: 0 10px 40px rgba(2, 6, 12, 0.6);
+				position: relative;
+				overflow: hidden;
+				border: 1px solid rgba(255, 255, 255, 0.03);
+			}
+
+			.map-frame {
+				position: absolute;
+				inset: 12px;
+				border-radius: 12px;
+				overflow: hidden;
+				background: linear-gradient(
+					180deg,
+					rgba(0, 0, 0, 0.12),
+					rgba(0, 0, 0, 0.18)
+				);
+			}
+			.map-inner {
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				transform-origin: 0 0;
+				will-change: transform;
+				touch-action: none;
+			}
+
+			/* navy-blue tint overlay applied over the map image */
+			.map-inner::before {
+				content: "";
+				position: absolute;
+				inset: 0;
+				pointer-events: none;
+				z-index: 10; /* behind markers (markers have z-index:40) */
+			}
+
+			.map-img {
+				display: block;
+				max-width: none;
+				user-select: none;
+				pointer-events: none;
+
+				position: relative;
+				z-index: 0;
+			}
+
+			.marker {
+				position: absolute;
+				transform: translate(-50%, -50%);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 15px;
+				cursor: pointer;
+				transition: transform 0.18s cubic-bezier(0.16, 0.8, 0.3, 1),
+					filter 0.18s;
+				z-index: 40;
+			}
+			.marker .badge {
+				width: 85px;
+				height: 85px;
+				/* 	border-radius: 12px; */
+				display: grid;
+				place-items: center;
+				/* 	background: linear-gradient(
+					180deg,
+					var(--accent),
+					var(--accent-2)
+				); */
+				/* 	box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
+				border: 1px solid rgba(255, 255, 255, 0.06); */
+				font-weight: 700;
+				color: #041022;
+			}
+			.marker .badge img {
+				width: 100%;
+				height: 100%;
+			}
+			.marker[data-group="sales"] .badge {
+				/* background: linear-gradient(180deg, #ffd166, #ff8a5b); */
+			}
+			.marker[data-type="office"] .badge {
+				/* 	background: linear-gradient(180deg, #8ef3ff, #49c2ff);
+				border-radius: 50%; */
+			}
+			.marker[data-type="factory"] .badge {
+				/* 	background: linear-gradient(180deg, #ff9ac2, #ff5e9e);
+				border-radius: 50%; */
+			}
+			.marker:hover {
+				transform: translate(-50%, -50%) scale(1.12);
+			}
+			.marker .label {
+				font-size: 1.2rem;
+				background: var(--panel);
+				padding: 6px 9px;
+				border-radius: 8px;
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				/* backdrop-filter: blur(6px); */
+				white-space: nowrap;
+			}
+
+			/* popup: semi full-screen */
+			.popup-full-backdrop {
+				position: fixed;
+				inset: 0;
+				background: linear-gradient(
+					180deg,
+					rgba(2, 6, 12, 0.6),
+					rgba(2, 6, 12, 0.8)
+				);
+				backdrop-filter: blur(6px);
+				z-index: 120;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.popup-full {
+				width: 92vw;
+				max-width: 1200px;
+				height: 86vh;
+				border-radius: 14px;
+				background: linear-gradient(
+					180deg,
+					rgba(8, 12, 18, 0.98),
+					rgba(6, 8, 12, 0.98)
+				);
+				box-shadow: 0 30px 80px rgba(2, 6, 12, 0.75);
+				border: 1px solid rgba(255, 255, 255, 0.04);
+				display: flex;
+				overflow: hidden;
+				position: relative;
+			}
+			.popup-left {
+				flex: 0 0 42%;
+				min-width: 320px;
+				background: linear-gradient(
+					180deg,
+					rgba(255, 255, 255, 0.02),
+					rgba(255, 255, 255, 0.01)
+				);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.popup-left img {
+				max-width: 92%;
+				max-height: 84%;
+				border-radius: 8px;
+				box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
+			}
+			.popup-right {
+				flex: 1;
+				padding: 22px 26px;
+				overflow: auto;
+			}
+			.popup-right h2 {
+				margin: 0 0 8px 0;
+				font-size: 20px;
+			}
+			.popup-right p {
+				color: var(--muted);
+				line-height: 1.5;
+			}
+			.popup-actions {
+				margin-top: 16px;
+				display: flex;
+				gap: 10px;
+			}
+			.popup .close {
+				position: absolute;
+				right: 12px;
+				top: 12px;
+				width: 36px;
+				height: 36px;
+				border-radius: 8px;
+				display: grid;
+				place-items: center;
+				cursor: pointer;
+			}
+
+			.legend {
+				position: fixed;
+				left: 22px;
+				top: 22px;
+				background: var(--panel);
+				padding: 10px;
+				border-radius: 12px;
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				backdrop-filter: blur(6px);
+				z-index: 60;
+			}
+			.legend h3 {
+				margin: 0 0 8px 0;
+				font-size: 13px;
+			}
+
+			.hint {
+				position: fixed;
+				left: 22px;
+				bottom: 22px;
+				background: linear-gradient(
+					90deg,
+					rgba(255, 255, 255, 0.02),
+					rgba(255, 255, 255, 0.01)
+				);
+				padding: 10px;
+				border-radius: 12px;
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				font-size: 13px;
+			}
+
+			@media (max-width: 900px) {
+				:root {
+					--ui-size: 48px;
+				}
+				.viewport {
+					height: 72vh;
+				}
+			}
+			@media (max-width: 560px) {
+				.marker .badge {
+					width: 40px;
+					height: 40px;
+				}
+				.marker .label {
+					display: none;
+				}
+				.popup-left {
+					display: none;
+				}
+				.popup-full {
+					width: 96vw;
+					height: 86vh;
+				}
+			}
+
+			@keyframes popupIn {
+				0% {
+					opacity: 0;
+					transform: translateY(10px) scale(0.99);
+				}
+				100% {
+					opacity: 1;
+					transform: translateY(0) scale(1);
+				}
+			}
+			.popup-animate {
+				animation: popupIn 0.32s cubic-bezier(0.22, 0.9, 0.2, 1);
+			}
+
+			@keyframes pulse {
+				0% {
+					transform: scale(0.9);
+				}
+				50% {
+					transform: scale(1.06);
+				}
+				100% {
+					transform: scale(0.9);
+				}
+			}
+			.pulse {
+				animation: pulse 3s ease-in-out infinite;
+			}
+
+			.titlebar {
+				position: fixed;
+				left: 50%;
+				transform: translateX(-50%);
+				top: 14px;
+				z-index: 70;
+				padding: 10px 18px;
+				border-radius: 999px;
+				background: linear-gradient(
+					90deg,
+					rgba(255, 255, 255, 0.02),
+					rgba(255, 255, 255, 0.01)
+				);
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				backdrop-filter: blur(6px);
+				display: flex;
+				gap: 14px;
+				align-items: center;
+			}
+			.titlebar h1 {
+				margin: 0;
+				font-size: 16px;
+				letter-spacing: 0.6px;
+			}
+			.titlebar small {
+				display: block;
+				font-size: 12px;
+				color: var(--muted);
+			}
+			.audio-toggle {
+				display: inline-grid;
+				place-items: center;
+				width: 36px;
+				height: 36px;
+				border-radius: 8px;
+				background: rgba(255, 255, 255, 0.02);
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="stars"></canvas>
+
+		<!-- Audio elements (replace src with your files) -->
+		<audio id="bgAudio" loop autoplay preload="auto">
+			<!-- Provide your background music file here (mp3/ogg). Autoplay may be blocked until user interacts. -->
+			<source src="bg.mp3" type="audio/mpeg" />
+		</audio>
+		<audio id="clickAudio" preload="auto">
+			<!-- Provide your click/open sound here -->
+			<source src="tap.mp3" type="audio/mpeg" />
+		</audio>
+
+		<div class="titlebar">
+			<div style="display: flex; flex-direction: column">
+				<h1>Industrial Exhibition — Interactive Map</h1>
+				<small>Dark mode · Gamified · Pan & Zoom</small>
+			</div>
+			<div style="width: 18px"></div>
+			<div
+				title="Toggle background audio"
+				id="audioToggle"
+				class="audio-toggle"
+			>
+				▶
+			</div>
+		</div>
+
+		<div class="legend">
+			<h3>Legend</h3>
+			<div style="display: flex; gap: 8px; align-items: center">
+				<div
+					style="
+						width: 14px;
+						height: 14px;
+						border-radius: 4px;
+						background: linear-gradient(
+							180deg,
+							var(--accent),
+							var(--accent-2)
+						);
+					"
+				></div>
+				<div style="font-size: 13px">Project</div>
+			</div>
+			<div
+				style="
+					display: flex;
+					gap: 8px;
+					align-items: center;
+					margin-top: 6px;
+				"
+			>
+				<div
+					style="
+						width: 14px;
+						height: 14px;
+						border-radius: 50%;
+						background: linear-gradient(180deg, #8ef3ff, #49c2ff);
+					"
+				></div>
+				<div style="font-size: 13px">Office</div>
+			</div>
+			<div
+				style="
+					display: flex;
+					gap: 8px;
+					align-items: center;
+					margin-top: 6px;
+				"
+			>
+				<div
+					style="
+						width: 14px;
+						height: 14px;
+						border-radius: 50%;
+						background: linear-gradient(180deg, #ff9ac2, #ff5e9e);
+					"
+				></div>
+				<div style="font-size: 13px">Factory</div>
+			</div>
+		</div>
+
+		<div class="controls">
+			<div class="toggle-group">
+				<div class="group-toggle" id="projects-toggle">
+					<input
+						type="checkbox"
+						id="projects-checkbox"
+						checked
+						style="accent-color: var(--accent); margin-right: 6px"
+					/>
+					Projects
+				</div>
+				<div class="group-toggle" id="sales-toggle">
+					<input
+						type="checkbox"
+						id="sales-checkbox"
+						style="accent-color: #ff8a5b; margin-right: 6px"
+					/>
+					Sales Reps
+				</div>
+			</div>
+			<div style="height: 8px"></div>
+			<div
+				style="
+					display: flex;
+					flex-direction: column;
+					gap: 8px;
+					align-items: end;
+				"
+			>
+				<button class="btn" id="zoom-in" title="Zoom in">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="1.6"
+							d="M12 5v14M5 12h14"
+						/>
+					</svg>
+				</button>
+				<button class="btn" id="zoom-out" title="Zoom out">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="1.6"
+							d="M5 12h14"
+						/>
+					</svg>
+				</button>
+			</div>
+		</div>
+
+		<div class="app">
+			<div class="viewport" id="viewport">
+				<div class="map-frame">
+					<div
+						class="map-inner"
+						id="mapInner"
+						style="
+							left: 50%;
+							top: 50%;
+							transform: translate(-50%, -50%) scale(1)
+								translate(0px, 0px);
+						"
+					>
+						<img
+							src="ir-04.png"
+							alt="map"
+							class="map-img"
+							id="mapImage"
+						/>
+
+						<div
+							class="marker"
+							data-id="p1"
+							data-group="projects"
+							data-x="21.5"
+							data-y="38.2"
+							data-image=""
+						>
+							<div
+								class="badge"
+								style="background-image: src('msc.png')"
+							>
+								A1
+							</div>
+							<div class="label">Project A1</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="65.2"
+							data-y="85.8"
+							data-image=""
+						>
+							<div class="badge">
+								<img src="msc.png" />
+							</div>
+							<div class="label">Project B2</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p3"
+							data-group="projects"
+							data-x="66.2"
+							data-y="28.6"
+							data-image=""
+						>
+							<div class="badge">C3</div>
+							<div class="label">Project C3</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="s1"
+							data-group="sales"
+							data-x="32.7"
+							data-y="49.6"
+						>
+							<div class="badge">SR</div>
+							<div class="label">Sales — Reza</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="office"
+							data-type="office"
+							data-group="fixed"
+							data-x="53.1"
+							data-y="52.6"
+						>
+							<div class="badge">O</div>
+							<div class="label">Head Office</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="factory"
+							data-type="factory"
+							data-group="fixed"
+							data-x="69.8"
+							data-y="64.3"
+						>
+							<div class="badge">F</div>
+							<div class="label">Factory</div>
+						</div>
+					</div>
+				</div>
+				<div id="popupRoot"></div>
+			</div>
+		</div>
+
+		<div class="hint">
+			Tip: drag to pan · mousewheel to zoom · tap markers to open details
+			· toggle audio ▶
+		</div>
+
+		<script>
+			const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+			const mapInner = document.getElementById("mapInner");
+			const mapImage = document.getElementById("mapImage");
+			const viewport = document.getElementById("viewport");
+			let state = {
+				scale: 1,
+				minScale: 0.5,
+				maxScale: 1.5,
+				translateX: 0,
+				translateY: 0,
+				dragging: false,
+				lastMouse: { x: 0, y: 0 },
+			};
+			function updateTransform() {
+				mapInner.style.transform = `translate(-50%,-50%) translate(${state.translateX}px, ${state.translateY}px) scale(${state.scale})`;
+			}
+
+			function positionMarkers() {
+				const markers = mapInner.querySelectorAll(".marker");
+				const rect = mapImage.getBoundingClientRect();
+				const width = rect.width;
+				const height = rect.height;
+				markers.forEach((m) => {
+					const dx = parseFloat(m.dataset.x) || 0;
+					const dy = parseFloat(m.dataset.y) || 0;
+					const left = (dx / 100) * width;
+					const top = (dy / 100) * height;
+					m.style.left = left + "px";
+					m.style.top = top + "px";
+				});
+			}
+			function onImageReady() {
+				const rect = mapImage.getBoundingClientRect();
+				mapInner.style.width = rect.width + "px";
+				mapInner.style.height = rect.height + "px";
+				positionMarkers();
+
+				const initialScale = 0.4; // 1 = default display size; >1 zooms in, <1 zooms out
+				state.scale = clamp(
+					initialScale,
+					state.minScale,
+					state.maxScale
+				);
+				state.translateX = 0; // optional: center on map
+				state.translateY = 0;
+				updateTransform();
+			}
+			window.addEventListener("resize", onImageReady);
+			if (mapImage.complete) onImageReady();
+			else mapImage.addEventListener("load", onImageReady);
+
+			viewport.addEventListener("mousedown", (e) => {
+				if (e.button !== 0) return;
+				state.dragging = true;
+				state.lastMouse = { x: e.clientX, y: e.clientY };
+				viewport.style.cursor = "grabbing";
+			});
+			window.addEventListener("mouseup", () => {
+				state.dragging = false;
+				viewport.style.cursor = "";
+			});
+			window.addEventListener("mousemove", (e) => {
+				if (!state.dragging) return;
+				const dx = e.clientX - state.lastMouse.x;
+				const dy = e.clientY - state.lastMouse.y;
+				state.lastMouse = { x: e.clientX, y: e.clientY };
+				state.translateX += dx;
+				state.translateY += dy;
+				limitPan();
+				updateTransform();
+			});
+
+			viewport.addEventListener(
+				"wheel",
+				(e) => {
+					e.preventDefault();
+					const delta = -e.deltaY * 0.0015;
+					zoomAt(e.clientX, e.clientY, 1 + delta);
+				},
+				{ passive: false }
+			);
+			function zoomAt(clientX, clientY, zoomFactor) {
+				const oldScale = state.scale;
+				let newScale = clamp(
+					oldScale * zoomFactor,
+					state.minScale,
+					state.maxScale
+				);
+				zoomFactor = newScale / oldScale;
+				const mapRect = mapInner.getBoundingClientRect();
+				const offsetX = clientX - mapRect.left;
+				const offsetY = clientY - mapRect.top;
+				state.translateX =
+					(state.translateX - offsetX) * zoomFactor + offsetX;
+				state.translateY =
+					(state.translateY - offsetY) * zoomFactor + offsetY;
+				state.scale = newScale;
+				limitPan();
+				updateTransform();
+			}
+			function limitPan() {
+				const mapRect = mapInner.getBoundingClientRect();
+				const vpRect = viewport.getBoundingClientRect();
+				const scaledW = mapRect.width;
+				const scaledH = mapRect.height;
+				state.translateX = clamp(
+					state.translateX,
+					-scaledW * 2,
+					scaledW * 2
+				);
+				state.translateY = clamp(
+					state.translateY,
+					-scaledH * 2,
+					scaledH * 2
+				);
+			}
+
+			document.getElementById("zoom-in").addEventListener("click", () => {
+				const vp = viewport.getBoundingClientRect();
+				zoomAt(vp.left + vp.width / 2, vp.top + vp.height / 2, 1.18);
+			});
+			document
+				.getElementById("zoom-out")
+				.addEventListener("click", () => {
+					const vp = viewport.getBoundingClientRect();
+					zoomAt(
+						vp.left + vp.width / 2,
+						vp.top + vp.height / 2,
+						0.86
+					);
+				});
+
+			// touch
+			let lastTouchDist = null;
+			let lastTouchCenter = null;
+			viewport.addEventListener(
+				"touchstart",
+				(e) => {
+					if (e.touches.length === 1) {
+						state.dragging = true;
+						state.lastMouse = {
+							x: e.touches[0].clientX,
+							y: e.touches[0].clientY,
+						};
+					} else if (e.touches.length === 2) {
+						state.dragging = false;
+						lastTouchDist = distance(e.touches[0], e.touches[1]);
+						lastTouchCenter = centerPoint(
+							e.touches[0],
+							e.touches[1]
+						);
+					}
+				},
+				{ passive: true }
+			);
+			viewport.addEventListener(
+				"touchmove",
+				(e) => {
+					if (e.touches.length === 1 && state.dragging) {
+						const t = e.touches[0];
+						const dx = t.clientX - state.lastMouse.x;
+						const dy = t.clientY - state.lastMouse.y;
+						state.lastMouse = { x: t.clientX, y: t.clientY };
+						state.translateX += dx;
+						state.translateY += dy;
+						limitPan();
+						updateTransform();
+					} else if (e.touches.length === 2) {
+						const d = distance(e.touches[0], e.touches[1]);
+						const c = centerPoint(e.touches[0], e.touches[1]);
+						if (lastTouchDist) {
+							const factor = d / lastTouchDist;
+							zoomAt(c.clientX, c.clientY, factor);
+						}
+						lastTouchDist = d;
+						lastTouchCenter = c;
+					}
+				},
+				{ passive: false }
+			);
+			viewport.addEventListener(
+				"touchend",
+				(e) => {
+					if (e.touches.length === 0) {
+						state.dragging = false;
+						lastTouchDist = null;
+						lastTouchCenter = null;
+					}
+				},
+				{ passive: true }
+			);
+			function distance(a, b) {
+				return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+			}
+			function centerPoint(a, b) {
+				return {
+					clientX: (a.clientX + b.clientX) / 2,
+					clientY: (a.clientY + b.clientY) / 2,
+				};
+			}
+
+			// popup + sounds
+			const popupRoot = document.getElementById("popupRoot");
+			const clickAudio = document.getElementById("clickAudio");
+			const bgAudio = document.getElementById("bgAudio");
+			const audioToggle = document.getElementById("audioToggle");
+			let bgPlaying = false;
+
+			// toggle background audio (user interaction required in many browsers)
+			audioToggle.addEventListener("click", () => {
+				if (!bgPlaying) {
+					// try to play
+					bgAudio
+						.play()
+						.then(() => {
+							bgPlaying = true;
+							audioToggle.textContent = "⏸";
+						})
+						.catch(() => {
+							audioToggle.textContent = "▶";
+							alert(
+								"Browser blocked autoplay. Interact with the page (click) and try again."
+							);
+						});
+				} else {
+					bgAudio.pause();
+					bgPlaying = false;
+					audioToggle.textContent = "▶";
+				}
+			});
+
+			mapInner.addEventListener("click", (e) => {
+				const marker = e.target.closest(".marker");
+				if (!marker) return;
+				e.stopPropagation();
+				openPopupFor(marker);
+			});
+			window.addEventListener("click", () => {
+				/* clicking outside closes popup */ if (
+					!popupRoot.querySelector(".popup-full-backdrop")
+				)
+					return;
+				closePopup();
+			});
+
+			function openPopupFor(marker) {
+				closePopup();
+				// play click/open sound if available
+				try {
+					clickAudio.currentTime = 0;
+					clickAudio.play().catch(() => {});
+				} catch (e) {}
+
+				const id = marker.dataset.id || "unknown";
+				const title =
+					(marker.querySelector(".label") || {}).textContent || id;
+				const imageSrc = marker.dataset.image || "";
+				const desc =
+					marker.dataset.desc ||
+					"Replace this with project description. You can set data-desc on marker or fetch remote content.";
+
+				const html = `
+        <div class="popup-full-backdrop popup-animate" data-marker="${id}">
+          <div class="popup-full">
+            <div class="popup-left">
+              ${
+					imageSrc
+						? `<img src="${imageSrc}" alt="${title}">`
+						: `<div style="color:var(--muted);text-align:center;padding:22px;">No image provided.<br><small>add data-image attribute to marker</small></div>`
+				}
+            </div>
+            <div class="popup-right">
+              <div class="close" id="popupClose">✕</div>
+              <h2>${title}</h2>
+              <p>${desc}</p>
+              <div class="popup-actions">
+                <button class="btn" id="action1">View Gallery</button>
+                <button class="btn" id="action2">Contact</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+				popupRoot.innerHTML = html;
+				const backdrop = popupRoot.querySelector(
+					".popup-full-backdrop"
+				);
+				// prevent event trickle closing when clicking inside
+				backdrop.addEventListener("click", (ev) => {
+					if (ev.target === backdrop) closePopup();
+				});
+				const closeBtn = popupRoot.querySelector("#popupClose");
+				if (closeBtn)
+					closeBtn.addEventListener("click", (ev) => {
+						ev.stopPropagation();
+						closePopup();
+					});
+
+				// animate transform for map to focus on marker (optional subtle zoom)
+				// play an extra short flourish sound if desired (re-using clickAudio)
+			}
+			function closePopup() {
+				popupRoot.innerHTML = "";
+			}
+
+			// toggles
+			const projectsCheckbox =
+				document.getElementById("projects-checkbox");
+			const salesCheckbox = document.getElementById("sales-checkbox");
+			function applyToggles() {
+				const markers = mapInner.querySelectorAll(".marker");
+				markers.forEach((m) => {
+					const g = m.dataset.group || "";
+					if (g === "projects")
+						m.style.display = projectsCheckbox.checked
+							? "flex"
+							: "none";
+					if (g === "sales")
+						m.style.display = salesCheckbox.checked
+							? "flex"
+							: "none";
+				});
+			}
+			projectsCheckbox.addEventListener("change", applyToggles);
+			salesCheckbox.addEventListener("change", applyToggles);
+			salesCheckbox.checked = false;
+			applyToggles();
+
+			let ro = new ResizeObserver(() => {
+				onImageReady();
+			});
+			ro.observe(mapImage);
+
+			(function starfield() {
+				const c = document.getElementById("stars");
+				const ctx = c.getContext("2d");
+				let w,
+					h,
+					stars = [];
+				function resize() {
+					w = innerWidth;
+					h = innerHeight;
+					c.width = w;
+					c.height = h;
+					init();
+				}
+				function init() {
+					stars = [];
+					for (let i = 0; i < 120; i++) {
+						stars.push({
+							x: Math.random() * w,
+							y: Math.random() * h,
+							r: Math.random() * 1.6 + 0.2,
+							a: Math.random() * 0.9,
+						});
+					}
+				}
+				function draw() {
+					ctx.clearRect(0, 0, w, h);
+					for (const s of stars) {
+						ctx.globalAlpha = s.a;
+						ctx.beginPath();
+						ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+						ctx.fillStyle = "#8ab6ff";
+						ctx.fill();
+					}
+				}
+				window.addEventListener("resize", resize);
+				resize();
+				function loop() {
+					for (const s of stars) {
+						s.x += (Math.random() - 0.5) * 0.4;
+						s.y += (Math.random() - 0.5) * 0.4;
+						s.a = 0.6 + Math.sin(Date.now() / 1000 + s.x) * 0.3;
+					}
+					draw();
+					requestAnimationFrame(loop);
+				}
+				loop();
+			})();
+
+			window.addMarker = function (opts) {
+				const el = document.createElement("div");
+				el.className = "marker";
+				el.dataset.id = opts.id || "m" + Date.now();
+				el.dataset.x = opts.x || 0;
+				el.dataset.y = opts.y || 0;
+				el.dataset.group = opts.group || "projects";
+				if (opts.type) el.dataset.type = opts.type;
+				if (opts.image) el.dataset.image = opts.image;
+				if (opts.desc) el.dataset.desc = opts.desc;
+				el.innerHTML = `<div class="badge">${(
+					opts.label ||
+					opts.id ||
+					"M"
+				).slice(0, 2)}</div><div class="label">${
+					opts.label || opts.id
+				}</div>`;
+				mapInner.appendChild(el);
+				onImageReady();
+				applyToggles();
+				return el;
+			};
+
+			window.addEventListener("keydown", (e) => {
+				if (e.key === "+") document.getElementById("zoom-in").click();
+				if (e.key === "-") document.getElementById("zoom-out").click();
+			});
+		</script>
+	</body>
+</html>
