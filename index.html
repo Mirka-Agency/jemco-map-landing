@@ -3,11 +3,12 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		<title>Gamified Industry Exhibition — Interactive Iran Map</title>
+		<title>جمکو بر روی نقشه</title>
 		<link
 			href="assets/fonts/vazirmatn-v33.003/Vazirmatn-Variable-font-face.css"
 			rel="stylesheet"
 		/>
+		<link rel="icon" href="assets/img/fav.png" sizes="192x192" />
 		<style>
 			:root {
 				--bg: #071022; /* dark deep */
@@ -20,6 +21,29 @@
 					0 0 40px rgba(110, 231, 183, 0.06);
 				--ui-size: 56px;
 			}
+			/* Target the scrollbar */
+			::-webkit-scrollbar {
+				width: 6px;
+				height: 6px;
+			}
+
+			/* Track (background) */
+			::-webkit-scrollbar-track {
+				background: var(--bg);
+				border-radius: 6px;
+			}
+
+			/* Handle (thumb) */
+			::-webkit-scrollbar-thumb {
+				background: #243a5ecc;
+				border-radius: 6px;
+			}
+
+			/* Handle on hover */
+			::-webkit-scrollbar-thumb:hover {
+				background: #243a5ecc;
+			}
+
 			html,
 			body {
 				height: 100%;
@@ -80,11 +104,7 @@
 				display: inline-grid;
 				place-items: center;
 				border-radius: 12px;
-				background: linear-gradient(
-					180deg,
-					rgba(255, 255, 255, 0.03),
-					rgba(255, 255, 255, 0.01)
-				);
+				background-color: #eee;
 				backdrop-filter: blur(6px);
 				box-shadow: var(--neon);
 				border: 1px solid rgba(255, 255, 255, 0.04);
@@ -99,7 +119,7 @@
 				transform: translateY(2px) scale(0.99);
 			}
 			.group-toggle {
-				padding: 8px 12px;
+				/* padding: 8px 12px; */
 				border-radius: 999px;
 				background: linear-gradient(
 					90deg,
@@ -114,7 +134,7 @@
 
 			.viewport {
 				width: 100%;
-				max-width: 1400px;
+				max-width: 75vw;
 				height: 78vh;
 				background: linear-gradient(
 					180deg,
@@ -126,12 +146,12 @@
 				box-shadow: 0 10px 40px rgba(2, 6, 12, 0.6);
 				position: relative;
 				overflow: hidden;
-				border: 1px solid rgba(255, 255, 255, 0.03);
+				border: 10px solid #224;
 			}
 
 			.map-frame {
 				position: absolute;
-				inset: 12px;
+				inset: 0;
 				border-radius: 12px;
 				overflow: hidden;
 				background: linear-gradient(
@@ -145,7 +165,7 @@
 				left: 50%;
 				top: 50%;
 				transform-origin: 0 0;
-				will-change: transform;
+				/* will-change: transform; */
 				touch-action: none;
 			}
 
@@ -268,15 +288,19 @@
 				justify-content: center;
 			}
 			.popup-left img {
-				max-width: 92%;
-				max-height: 84%;
-				border-radius: 8px;
+				max-width: 100%;
+				max-height: 100%;
+				height: 100%;
+				width: 100%;
+				object-fit: cover;
+				border-radius: 8px 0 0 8px;
 				box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
 			}
 			.popup-right {
 				flex: 1;
 				padding: 22px 26px;
 				overflow: auto;
+				direction: rtl;
 			}
 			.popup-right h2 {
 				margin: 0 0 8px 0;
@@ -291,16 +315,13 @@
 				display: flex;
 				gap: 10px;
 			}
-			.popup .close {
-				position: absolute;
-				right: 12px;
-				top: 12px;
+			.close {
 				width: 36px;
 				height: 36px;
 				border-radius: 8px;
 				display: grid;
 				place-items: center;
-				cursor: pointer;
+				cursor: pointer !important;
 			}
 
 			.legend {
@@ -320,8 +341,9 @@
 			}
 
 			.hint {
+				direction: rtl;
 				position: fixed;
-				left: 22px;
+				right: 22px;
 				bottom: 22px;
 				background: linear-gradient(
 					90deg,
@@ -389,6 +411,7 @@
 			}
 
 			.titlebar {
+				text-align: right;
 				position: fixed;
 				left: 50%;
 				transform: translateX(-50%);
@@ -427,7 +450,17 @@
 				border: 1px solid rgba(255, 255, 255, 0.03);
 				cursor: pointer;
 			}
+
+			.sales-popup-item {
+				background-color: rgba(185, 185, 225, 0.2);
+				padding: 12px;
+				border-radius: 12px;
+				margin-bottom: 12px;
+			}
 		</style>
+
+		<link rel="preload" as="image" href="assets/img/sales/kerman.jpg" />
+		<link rel="preload" as="image" href="assets/img/sales/mashhad.jpg" />
 	</head>
 	<body>
 		<canvas id="stars"></canvas>
@@ -444,8 +477,10 @@
 
 		<div class="titlebar">
 			<div style="display: flex; flex-direction: column">
-				<h1>Industrial Exhibition — Interactive Map</h1>
-				<small>Dark mode · Gamified · Pan & Zoom</small>
+				<h1>
+					نگاهی به شرکت ماشین‌های الکتریکی جوین (جمکو) بر روی نقشه
+				</h1>
+				<small>هلدینگ صنایع معدنی کاوه پارس </small>
 			</div>
 			<div style="width: 18px"></div>
 			<div
@@ -458,78 +493,92 @@
 		</div>
 
 		<div class="legend">
-			<h3>Legend</h3>
-			<div style="display: flex; gap: 8px; align-items: center">
+			<img src="assets/img/jemco-white.png" style="width: 120px" />
+			<div style="display: none">
+				<h3>Legend</h3>
+				<div style="display: flex; gap: 8px; align-items: center">
+					<div
+						style="
+							width: 14px;
+							height: 14px;
+							border-radius: 4px;
+							background: linear-gradient(
+								180deg,
+								var(--accent),
+								var(--accent-2)
+							);
+						"
+					></div>
+					<div style="font-size: 13px">Project</div>
+				</div>
 				<div
 					style="
-						width: 14px;
-						height: 14px;
-						border-radius: 4px;
-						background: linear-gradient(
-							180deg,
-							var(--accent),
-							var(--accent-2)
-						);
+						display: flex;
+						gap: 8px;
+						align-items: center;
+						margin-top: 6px;
 					"
-				></div>
-				<div style="font-size: 13px">Project</div>
-			</div>
-			<div
-				style="
-					display: flex;
-					gap: 8px;
-					align-items: center;
-					margin-top: 6px;
-				"
-			>
+				>
+					<div
+						style="
+							width: 14px;
+							height: 14px;
+							border-radius: 50%;
+							background: linear-gradient(
+								180deg,
+								#8ef3ff,
+								#49c2ff
+							);
+						"
+					></div>
+					<div style="font-size: 13px">Office</div>
+				</div>
 				<div
 					style="
-						width: 14px;
-						height: 14px;
-						border-radius: 50%;
-						background: linear-gradient(180deg, #8ef3ff, #49c2ff);
+						display: flex;
+						gap: 8px;
+						align-items: center;
+						margin-top: 6px;
 					"
-				></div>
-				<div style="font-size: 13px">Office</div>
-			</div>
-			<div
-				style="
-					display: flex;
-					gap: 8px;
-					align-items: center;
-					margin-top: 6px;
-				"
-			>
-				<div
-					style="
-						width: 14px;
-						height: 14px;
-						border-radius: 50%;
-						background: linear-gradient(180deg, #ff9ac2, #ff5e9e);
-					"
-				></div>
-				<div style="font-size: 13px">Factory</div>
+				>
+					<div
+						style="
+							width: 14px;
+							height: 14px;
+							border-radius: 50%;
+							background: linear-gradient(
+								180deg,
+								#ff9ac2,
+								#ff5e9e
+							);
+						"
+					></div>
+					<div style="font-size: 13px">Factory</div>
+				</div>
 			</div>
 		</div>
 
 		<div class="controls">
 			<div class="toggle-group">
 				<div class="group-toggle" id="projects-toggle">
+					<label for="projects-checkbox">پروژه های جمکو</label>
 					<input
 						type="checkbox"
 						id="projects-checkbox"
+						name="projects-checkbox"
 						checked
 						style="accent-color: var(--accent); margin-right: 6px"
 					/>
-					Projects
 				</div>
 				<div class="group-toggle" id="sales-toggle">
+					<label for="sales-checkbox">نمایندگان فروش</label>
 					<input
 						type="checkbox"
 						id="sales-checkbox"
+						name="sales-checkbox"
+						checked
 						style="accent-color: #ff8a5b; margin-right: 6px"
 					/>
-					Sales Reps
 				</div>
 			</div>
 			<div style="height: 8px"></div>
@@ -615,12 +664,87 @@
 						<div
 							class="marker"
 							data-id="s1"
+							data-desc="
+							<div class='sales-popup-item'>
+							<h4>کالا صنعتی</h4>
+<b>شماره تلفن:</b>
+02191304300
+<br/>
+<b>ایمیل:</b>
+info@kalasanati.com
+<br/>
+<b>وبسایت:</b>
+www.kalasanati.com<br/>
+<b>آدرس: </b>
+استان خراسان رضوی، مشهد، بلوار ریاضی، ریاضی ۵۱/۲، ساختمان کلا‌صنعتی، خیابان سیدی، ایران
+							</div><div class='sales-popup-item'>
+	<h4>جهان پارت</h4>
+<b>شماره تلفن:</b>
+05133446135
+<br/>
+<b>آدرس:</b>
+مشهد- بلوار فرودگاه -مقابل پمپ بنزین-پلاک 242-کد پستی 9165616413
+							</div><div class='sales-popup-item'>
+	<h4>شرکت آب فلز پمپ شرق</h4>
+<b>شماره تلفن:</b>
+05138665598
+<br/>
+<b>آدرس: </b>
+مشهد-بلواروکیل آباد - نبش وکیل آباد34- پلاک842-كدپستی: 9178875669
+							</div>
+
+							<div class='sales-popup-item'>
+	<h4>شرکت آب فلز پمپ شرق</h4>
+<b>شماره تلفن:</b>
+05138665598
+<br/>
+<b>آدرس: </b>
+مشهد-بلواروکیل آباد - نبش وکیل آباد34- پلاک842-كدپستی: 9178875669
+							</div>
+
+							<div class='sales-popup-item'>
+	<h4>شرکت آب فلز پمپ شرق</h4>
+<b>شماره تلفن:</b>
+05138665598
+<br/>
+<b>آدرس: </b>
+مشهد-بلواروکیل آباد - نبش وکیل آباد34- پلاک842-كدپستی: 9178875669
+							</div>
+"
+							data-image="assets/img/sales/mashhad.jpg"
 							data-group="sales"
-							data-x="32.7"
-							data-y="49.6"
+							data-x="130"
+							data-y="76"
 						>
-							<div class="badge">SR</div>
-							<div class="label">Sales — Reza</div>
+							<div class="badge">
+								<img src="assets/img/jemco-pin.png" />
+							</div>
+							<div class="label">نمایندگان مشهد</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="s1"
+							data-desc="
+							
+							<div class='sales-popup-item'>
+<h4>شرکت عمران آب بابکان</h4>
+<b>شماره تلفن:</b>
+03432132961
+<br/>
+<b>آدرس: </b>کرمان- بلوارآیت ا...صدوقی(جاده تهران)روبروی شرکت ذغالسنگ-نبش بلوارهوشنگ مرادی-كدپستی7618844344<br/>
+							</div>
+							
+"
+							data-image="assets/img/sales/kerman.jpg"
+							data-group="sales"
+							data-x="115"
+							data-y="120"
+						>
+							<div class="badge">
+								<img src="assets/img/jemco-pin.png" />
+							</div>
+							<div class="label">نمایندگان کرمان</div>
 						</div>
 
 						<!--End Sales-->
@@ -654,14 +778,18 @@
 						</div>
 					</div>
 				</div>
-				<div id="popupRoot"></div>
 			</div>
 		</div>
 
 		<div class="hint">
-			Tip: drag to pan · mousewheel to zoom · tap markers to open details
-			· toggle audio ▶
+			این موارد تنها برخی از پروژه‌های مورد اهمیت جمکو هستند.
+			<br />برای مشاهده نمایندگان، از بخش بالای صفحه تیک نمایندگان را فعال
+			کنید.
 		</div>
+
+		<!-- popup root placed outside of the map viewport so its scrolling isn't
+		     intercepted by map pan/zoom handlers -->
+		<div id="popupRoot"></div>
 
 		<script>
 			const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -748,19 +876,29 @@
 			);
 			function zoomAt(clientX, clientY, zoomFactor) {
 				const oldScale = state.scale;
-				let newScale = clamp(
+				const newScale = clamp(
 					oldScale * zoomFactor,
 					state.minScale,
 					state.maxScale
 				);
-				zoomFactor = newScale / oldScale;
+
+				if (newScale === oldScale) return;
+
+				// Map element rect (screen coords)
 				const mapRect = mapInner.getBoundingClientRect();
+
+				// offset of pointer inside map (screen px)
 				const offsetX = clientX - mapRect.left;
 				const offsetY = clientY - mapRect.top;
-				state.translateX =
-					(state.translateX - offsetX) * zoomFactor + offsetX;
-				state.translateY =
-					(state.translateY - offsetY) * zoomFactor + offsetY;
+
+				// compute local (unscaled) coordinate of pointer relative to map image origin
+				const localX = (offsetX - state.translateX) / oldScale;
+				const localY = (offsetY - state.translateY) / oldScale;
+
+				// compute new translate so newScale * local + newTranslate = offset
+				state.translateX = offsetX - newScale * localX;
+				state.translateY = offsetY - newScale * localY;
+
 				state.scale = newScale;
 				limitPan();
 				updateTransform();
@@ -922,9 +1060,7 @@
 				const title =
 					(marker.querySelector(".label") || {}).textContent || id;
 				const imageSrc = marker.dataset.image || "";
-				const desc =
-					marker.dataset.desc ||
-					"Replace this with project description. You can set data-desc on marker or fetch remote content.";
+				const desc = marker.dataset.desc || "بدون توضیحات";
 
 				const html = `
         <div class="popup-full-backdrop popup-animate" data-marker="${id}">
@@ -933,17 +1069,17 @@
               ${
 					imageSrc
 						? `<img src="${imageSrc}" alt="${title}">`
-						: `<div style="color:var(--muted);text-align:center;padding:22px;">No image provided.<br><small>add data-image attribute to marker</small></div>`
+						: `<div style="color:var(--muted);text-align:center;padding:22px;">بدون تصویر</div>`
 				}
             </div>
             <div class="popup-right">
               <div class="close" id="popupClose">✕</div>
               <h2>${title}</h2>
               <p>${desc}</p>
-              <div class="popup-actions">
+             <!-- <div class="popup-actions">
                 <button class="btn" id="action1">View Gallery</button>
                 <button class="btn" id="action2">Contact</button>
-              </div>
+              </div>-->
             </div>
           </div>
         </div>
@@ -963,6 +1099,35 @@
 						ev.stopPropagation();
 						closePopup();
 					});
+
+				// Prevent map pan/zoom while interacting with popup scroll area
+				const popupRight = popupRoot.querySelector(".popup-right");
+				if (popupRight) {
+					// stop wheel events from reaching the viewport/map
+					popupRight.addEventListener(
+						"wheel",
+						(ev) => {
+							ev.stopPropagation();
+						},
+						{ passive: false }
+					);
+
+					// for touch devices, stop touchmove propagation when touching the popup
+					popupRight.addEventListener(
+						"touchstart",
+						(ev) => {
+							ev.stopPropagation();
+						},
+						{ passive: true }
+					);
+					popupRight.addEventListener(
+						"touchmove",
+						(ev) => {
+							ev.stopPropagation();
+						},
+						{ passive: false }
+					);
+				}
 
 				// animate transform for map to focus on marker (optional subtle zoom)
 				// play an extra short flourish sound if desired (re-using clickAudio)
@@ -991,7 +1156,7 @@
 			}
 			projectsCheckbox.addEventListener("change", applyToggles);
 			salesCheckbox.addEventListener("change", applyToggles);
-			salesCheckbox.checked = false;
+			//salesCheckbox.checked = false;
 			applyToggles();
 
 			let ro = new ResizeObserver(() => {
