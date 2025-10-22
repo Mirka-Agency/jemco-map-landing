@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>جمکو — الکتروموتور فوق‌العاده کارآمد</title>
+		<link
+			href="assets/fonts/vazirmatn-v33.003/Vazirmatn-Variable-font-face.css"
+			rel="stylesheet"
+		/>
+		<style>
+			:root{
+			  --bg:#0b0f12;
+			  --card: rgba(255,255,255,0.04);
+			  --glass: rgba(255,255,255,0.05);
+			  --accent:#00e6a8;
+			  --accent-2:#6bf0ff;
+			  --glass-border: rgba(255,255,255,0.06);
+			  --muted: rgba(255,255,255,0.6);
+			  --shadow: 0 10px 30px rgba(2,8,23,0.7);
+			  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Tahoma;
+			}
+			*{box-sizing:border-box}
+			html,body{height:100%;
+			         	font-family: "Vazirmatn";}
+			body{
+			  margin:0; background:linear-gradient(180deg,#04060a 0%, #07111a 60%); color:#fff; -webkit-font-smoothing:antialiased;
+			  -moz-osx-font-smoothing:grayscale; overflow-x:hidden;
+			}
+
+			/* Container */
+			.wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:48px 24px}
+			.container{width:1200px; max-width:calc(100% - 48px)}
+
+			/* Top bar */
+			.top{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:28px}
+			.brand{display:flex; align-items:center; gap:12px}
+			.brand img{height:56px; width:auto; border-radius:8px; object-fit:contain; box-shadow:var(--shadow)}
+			.brand h1{font-size:20px; margin:0; letter-spacing:0.6px}
+
+			/* hero */
+			.hero{display:grid; grid-template-columns: 1fr 480px; gap:28px; align-items:center}
+			@media (max-width:880px){.hero{grid-template-columns:1fr; padding-top:18px}}
+
+			.left{
+			  padding:28px; background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); border-radius:18px; border:1px solid var(--glass-border); box-shadow:var(--shadow)
+			}
+
+			.kicker{display:inline-block; padding:6px 10px; border-radius:999px; background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#021018; font-weight:700; margin-bottom:18px}
+			.headline{font-size:32px; line-height:1.05; margin:0 0 12px}
+			.sub{color:var(--muted); margin-bottom:18px}
+
+			.cta-row{display:flex; gap:12px; align-items:center}
+			.btn{background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#012; padding:12px 18px; border-radius:12px; border:none; cursor:pointer; font-weight:700; box-shadow:0 6px 18px rgba(0,230,168,0.12)}
+			.btn.ghost{background:transparent; border:1px solid var(--glass-border); color:var(--muted)}
+
+			/* product card */
+			.product-wrap{position:relative; height:520px; border-radius:20px; overflow:visible}
+			.product-card{position:relative; height:100%; border-radius:20px; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(6px); background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid var(--glass-border); box-shadow:0 30px 80px rgba(0,0,0,0.6)}
+
+			/* spotlight behind the product */
+			.spotlight{position:absolute; left:50%; top:35%; transform:translateX(-50%); width:820px; height:460px; border-radius:50%; filter:blur(60px); background: radial-gradient(closest-side, rgba(0,230,168,0.15), rgba(107,240,255,0.06) 35%, transparent 60%); z-index:1; pointer-events:none}
+			.product-img{position:relative; z-index:3; max-width:78%; max-height:78%; transform:translateY(6px); animation:float 6s ease-in-out infinite}
+			@keyframes float{0%{transform:translateY(4px)}50%{transform:translateY(-8px)}100%{transform:translateY:4px}}
+
+			/* badges & gamification */
+			.badge{position:absolute; top:18px; right:18px; z-index:4; display:flex; gap:10px; align-items:center}
+			.trophy{background:linear-gradient(90deg,var(--accent-2),var(--accent)); padding:10px 12px; border-radius:12px; font-weight:800; color:#012; box-shadow:0 8px 30px rgba(0,230,168,0.12)}
+			.score{background:rgba(255,255,255,0.03); padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.02); color:var(--muted)}
+
+			/* attributes grid */
+			.attributes{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:18px}
+			@media (max-width:880px){.attributes{grid-template-columns:repeat(1,1fr)}}
+			.attr{padding:14px; background:var(--card); border-radius:14px; border:1px solid var(--glass-border); display:flex; gap:12px; align-items:center}
+			.attr .icon{width:56px; height:56px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; background:linear-gradient(180deg, rgba(255,255,255,0.03), transparent)}
+			.attr h4{margin:0 0 4px}
+			.attr p{margin:0; color:var(--muted); font-size:14px}
+
+			/* story card */
+			.story{margin-top:18px; padding:16px; border-radius:12px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid var(--glass-border)}
+			.story h3{margin:0 0 8px}
+			.story p{margin:0; color:var(--muted); line-height:1.6}
+
+			/* compare bar */
+			.compare{margin-top:18px; padding:14px; border-radius:12px; background:rgba(255,255,255,0.02); border:1px solid var(--glass-border)}
+			.bars{display:flex; gap:12px; align-items:center}
+			.bar{flex:1}
+			.bar .label{font-size:13px; margin-bottom:6px}
+			.bar .meter{height:14px; background:rgba(255,255,255,0.03); border-radius:999px; overflow:hidden}
+			.bar .meter > i{display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-2)); width:0%; border-radius:999px}
+
+			/* footer */
+			.footer{margin-top:22px; display:flex; gap:12px; align-items:center; justify-content:space-between}
+			.meta{color:var(--muted); font-size:13px}
+
+			/* small screens */
+			@media (max-width:560px){
+			  .brand img{height:44px}
+			  .headline{font-size:22px}
+			  .product-wrap{height:420px}
+			}
+
+			/* small micro-animations */
+			.shine{position: absolute; inset:0; pointer-events:none; background:linear-gradient(120deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 40%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.04) 100%); transform:skewX(-18deg) translateX(-120%); animation:shimmer 4s linear infinite; mix-blend-mode:overlay}
+			@keyframes shimmer{to{transform:skewX(-18deg) translateX(120%)}}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<div class="container">
+				<div class="top">
+					<div class="brand">
+						<!-- put fuladmobarake-logo.png in same folder -->
+						<img
+							src="assets/img/projects/MSC1.png"
+							alt="فولاد مبارکه"
+						/>
+						<div>
+							<h1>جمکو — الکتروموتور‌های کارآمد صنعتی</h1>
+							<div style="color: var(--muted); font-size: 13px">
+								پیشرو در بهینه‌سازی مصرف انرژی برای صنایع سنگین
+							</div>
+						</div>
+					</div>
+					<div style="display: flex; gap: 10px; align-items: center">
+						<button
+							class="btn"
+							onclick="document.getElementById('inquiry').scrollIntoView({behavior:'smooth'})"
+						>
+							درخواست دموی اختصاصی
+						</button>
+						<button class="btn ghost" onclick="downloadSpec()">
+							دانلود دیتاشیت
+						</button>
+					</div>
+				</div>
+
+				<section class="hero">
+					<div class="left">
+						<span class="kicker">نوآوری صنعتی</span>
+						<h2 class="headline">
+							الکتروموتوری با بازدهی رکوردشکن<br />برای نسل جدید
+							صنعت
+						</h2>
+						<p class="sub">
+							جمکو محصولی توسعه داده که در تست‌های واقعی صنعتی
+							بازدهی‌ای بیشتر از نمونه‌های مطرح اروپایی نشان داده
+							است — طراحی شده برای پروژه‌های سنگین و شرایط عملیاتی
+							سخت.
+						</p>
+
+						<div class="compare" aria-hidden="true">
+							<div
+								style="
+									display: flex;
+									justify-content: space-between;
+									align-items: center;
+									margin-bottom: 10px;
+								"
+							>
+								<strong>بازدهی مقایسه‌ای</strong>
+								<div
+									style="color: var(--muted); font-size: 13px"
+								>
+									نتایج آزمایش‌ واقعی
+								</div>
+							</div>
+							<div class="bars">
+								<div class="bar">
+									<div class="label">زیمنس — 96.5%</div>
+									<div class="meter">
+										<i style="width: 96.5%"></i>
+									</div>
+								</div>
+								<div class="bar">
+									<div class="label">ABB — 96.2%</div>
+									<div class="meter">
+										<i style="width: 96.2%"></i>
+									</div>
+								</div>
+								<div class="bar">
+									<div class="label">جمکو — 97.19%</div>
+									<div class="meter">
+										<i style="width: 97.19%"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="attributes" style="margin-top: 16px">
+							<div class="attr">
+								<div class="icon">⚡</div>
+								<div>
+									<h4>بازدهی بالا</h4>
+									<p>97.19% — ثبت‌شده در تست میدانی صنعتی</p>
+								</div>
+							</div>
+							<div class="attr">
+								<div class="icon">🛠️</div>
+								<div>
+									<h4>طراحی سفارشی</h4>
+									<p>
+										هماهنگ با خواسته‌های پروژه و شرایط
+										عملیاتی مشتری
+									</p>
+								</div>
+							</div>
+							<div class="attr">
+								<div class="icon">📈</div>
+								<div>
+									<h4>صرفه‌جویی انرژی</h4>
+									<p>
+										کاهش هزینه‌های عملیاتی و افزایش بازده خط
+										تولید
+									</p>
+								</div>
+							</div>
+						</div>
+
+						<div class="story">
+							<h3>داستانی از میدان آزمون — روایت مدیرعامل</h3>
+							<p>
+								شرکت فولاد مبارکه برای نیاز تولیدی خود ۸ دستگاه
+								الکتروموتور ۱۹۰۰ کیلووات با مشخصات ویژه درخواست
+								داد. تیم فنی جمکو برای هر دستگاه طراحی‌ای ویژه و
+								مطابق با نیازهای آن مجموعه انجام داد. در زمان
+								آزمایش، بازرسان فولاد مبارکه از نتایج شگفت‌زده و
+								در ابتدا دچار تردید شدند — بازدهی دستگاه‌های
+								اروپایی مرجع ۹۶.۵% (زیمنس) و ۹۶.۲% (ABB) بود،
+								اما ایستگاه آزمون جمکو عدد ۹۷.۱۹% را نشان
+								می‌داد. پس از بررسی دقیق سلامت تجهیزات آزمایش و
+								تأیید صحت داده‌ها، مهندسان فولاد مبارکه با
+								ابزارهای خود پایش را تکرار کردند و دریافتند
+								محصول جمکو در عمل نیز از نمونه‌های مرجع بهتر عمل
+								می‌کند. این تجربه، گواهی بر توانمندی طراحی و
+								کنترل کیفیت ماست.
+							</p>
+						</div>
+
+						<div
+							style="
+								margin-top: 14px;
+								display: flex;
+								gap: 10px;
+								align-items: center;
+								flex-wrap: wrap;
+							"
+						>
+							<button
+								class="btn"
+								onclick="document.getElementById('inquiry').scrollIntoView({behavior:'smooth'})"
+							>
+								درخواست جلسه فنی
+							</button>
+							<button class="btn ghost" onclick="openCompare()">
+								جزییات فنی و مقایسه
+							</button>
+							<div
+								style="
+									margin-left: auto;
+									color: var(--muted);
+									font-size: 13px;
+								"
+							>
+								نمایشگر پروژه:
+								<strong style="color: var(--accent)"
+									>فولاد مبارکه</strong
+								>
+							</div>
+						</div>
+					</div>
+
+					<div class="product-wrap">
+						<div class="product-card">
+							<div class="spotlight"></div>
+							<div class="badge">
+								<div class="trophy">🏆 Efficiency Champion</div>
+								<div class="score">97.19%</div>
+							</div>
+							<!-- Put your product image named 'product.jpg' in same folder -->
+							<img
+								class="product-img"
+								src="assets/img/product.png"
+								alt="جمکو الکتروموتور"
+							/>
+							<div class="shine"></div>
+						</div>
+
+						<div
+							style="
+								position: absolute;
+								left: 18px;
+								bottom: 18px;
+								z-index: 5;
+								width: calc(100% - 36px);
+							"
+						>
+							<div
+								style="
+									display: flex;
+									gap: 10px;
+									align-items: center;
+									justify-content: space-between;
+								"
+							>
+								<div
+									style="
+										display: flex;
+										gap: 10px;
+										align-items: center;
+									"
+								>
+									<div
+										style="
+											background: rgba(
+												255,
+												255,
+												255,
+												0.03
+											);
+											padding: 8px 12px;
+											border-radius: 10px;
+											border: 1px solid
+												var(--glass-border);
+										"
+									>
+										پروژه: فولاد مبارکه
+									</div>
+									<div
+										style="
+											background: rgba(
+												255,
+												255,
+												255,
+												0.03
+											);
+											padding: 8px 12px;
+											border-radius: 10px;
+											border: 1px solid
+												var(--glass-border);
+										"
+									>
+										توان: 1900 کیلووات
+									</div>
+								</div>
+								<div style="display: flex; gap: 8px">
+									<button
+										class="btn"
+										onclick="highlightAttr()"
+									>
+										نشان دادن مزیت‌ها
+									</button>
+									<button
+										class="btn ghost"
+										onclick="playSound()"
+									>
+										پخش صدای تأیید
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- Inquiry / options -->
+				<div id="inquiry" style="margin-top: 22px">
+					<div
+						style="
+							display: flex;
+							gap: 14px;
+							flex-wrap: wrap;
+							align-items: flex-start;
+						"
+					>
+						<div
+							style="
+								flex: 1;
+								min-width: 260px;
+								border-radius: 12px;
+								padding: 18px;
+								background: var(--card);
+								border: 1px solid var(--glass-border);
+							"
+						>
+							<h3>گزینه‌های پروژه</h3>
+							<p style="color: var(--muted); margin-bottom: 12px">
+								قابلیت انتخاب بین پیکربندی‌ها و سرویس‌ها
+							</p>
+							<div
+								style="
+									display: flex;
+									gap: 8px;
+									flex-direction: column;
+								"
+							>
+								<label
+									style="
+										display: flex;
+										gap: 8px;
+										align-items: center;
+									"
+									><input type="radio" name="cfg" checked />
+									پیکربندی استاندارد</label
+								>
+								<label
+									style="
+										display: flex;
+										gap: 8px;
+										align-items: center;
+									"
+									><input type="radio" name="cfg" /> پیکربندی
+									بهینه‌سازی مصرف</label
+								>
+								<label
+									style="
+										display: flex;
+										gap: 8px;
+										align-items: center;
+									"
+									><input type="radio" name="cfg" /> پکیج پایش
+									و سرویس ۲۴/۷</label
+								>
+							</div>
+						</div>
+
+						<div
+							style="
+								width: 360px;
+								min-width: 260px;
+								border-radius: 12px;
+								padding: 18px;
+								background: var(--card);
+								border: 1px solid var(--glass-border);
+							"
+						>
+							<h3>امتیاز کیفیت (Gamified)</h3>
+							<p style="color: var(--muted); margin-bottom: 12px">
+								سیستم امتیازدهی جمکو — بر اساس بازده، پایداری و
+								سازگاری
+							</p>
+							<div
+								style="
+									display: flex;
+									gap: 10px;
+									align-items: center;
+								"
+							>
+								<div style="flex: 1">
+									<div
+										style="
+											font-size: 28px;
+											font-weight: 800;
+										"
+									>
+										97.19<span
+											style="
+												font-size: 12px;
+												font-weight: 600;
+												color: var(--muted);
+											"
+											>%</span
+										>
+									</div>
+									<div
+										style="
+											height: 10px;
+											background: rgba(
+												255,
+												255,
+												255,
+												0.03
+											);
+											border-radius: 999px;
+											margin-top: 8px;
+											overflow: hidden;
+										"
+									>
+										<div
+											id="gbar"
+											style="
+												height: 100%;
+												width: 0%;
+												background: linear-gradient(
+													90deg,
+													var(--accent),
+													var(--accent-2)
+												);
+											"
+										></div>
+									</div>
+								</div>
+								<div style="width: 86px; text-align: center">
+									<div
+										style="
+											font-size: 12px;
+											color: var(--muted);
+										"
+									>
+										رتبه
+									</div>
+									<div
+										style="
+											font-weight: 800;
+											font-size: 20px;
+										"
+									>
+										#1
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="footer">
+					<div class="meta">© جمکو — همه حقوق محفوظ است</div>
+					<div style="display: flex; gap: 8px; align-items: center">
+						<div style="color: var(--muted); font-size: 13px">
+							آیا می‌خواهید جزئیات بیشتری ببینید؟
+						</div>
+						<button
+							class="btn ghost"
+							onclick="document.getElementById('inquiry').scrollIntoView({behavior:'smooth'})"
+						>
+							تماس با تیم فنی
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<audio id="ping" src="assets/audio/tap.mp3" preload="auto"></audio>
+
+		<script>
+			// Small interactive behaviour
+			function downloadSpec() {
+				alert(
+					"دیتاشیت در دسترس نیست — فایل نمونه را با نام spec.pdf در پوشه قرار دهید."
+				);
+			}
+			function openCompare() {
+				alert("بخش جزییات فنی در نسخه نهایی قرار خواهد گرفت.");
+			}
+			function highlightAttr() {
+				const attrs = document.querySelectorAll(".attr");
+				attrs.forEach((a, i) => {
+					setTimeout(() => {
+						a.animate(
+							[
+								{ transform: "scale(1)" },
+								{ transform: "scale(1.03)" },
+							],
+							{
+								duration: 200,
+								direction: "alternate",
+								iterations: 2,
+							}
+						);
+					}, i * 120);
+				});
+			}
+			function playSound() {
+				const p = document.getElementById("ping");
+				if (p) {
+					p.currentTime = 0;
+					p.play().catch(() => {});
+				}
+			}
+
+			// animate gamification bar
+			window.addEventListener("load", () => {
+				setTimeout(() => {
+					document.getElementById("gbar").style.width = "97.19%";
+				}, 600);
+				// animate compare meters
+				document.querySelectorAll(".bar .meter > i").forEach((el) => {
+					const w = el.style.width;
+					el.style.width = "0%";
+					setTimeout(() => (el.style.width = w), 400);
+				});
+			});
+		</script>
+	</body>
+</html>
