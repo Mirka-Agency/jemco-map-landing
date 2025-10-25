@@ -43,13 +43,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	// --- Global Chart Configuration ---
 	Chart.defaults.color = "#a0a0c0"; // Legend/Axis color
-	Chart.defaults.font.family = "Roboto";
+	Chart.defaults.font.family = "Vazirmatn";
 	Chart.defaults.plugins.tooltip.backgroundColor = "#0a0c1f";
 	Chart.defaults.plugins.tooltip.titleFont = {
-		family: "Montserrat",
+		family: "Vazirmatn",
 		weight: "bold",
 	};
-	Chart.defaults.plugins.tooltip.bodyFont = { family: "Roboto" };
+	Chart.defaults.plugins.tooltip.bodyFont = { family: "Vazirmatn" };
 	Chart.defaults.plugins.tooltip.padding = 10;
 	Chart.defaults.plugins.tooltip.cornerRadius = 5;
 
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			labels: [], // To be populated by updateChart
 			datasets: [
 				{
-					label: "پس‌انداز تجمعی (میلیارد تومان) در برابر ABB",
+					label: "صرفه‌جویی در برابر ای‌بی‌بی",
 					data: [], // To be populated
 					borderColor: "#f94144", // Red
 					backgroundColor: "rgba(249, 65, 68, 0.1)",
@@ -69,9 +69,9 @@ document.addEventListener("DOMContentLoaded", function () {
 					tension: 0.3,
 				},
 				{
-					label: "پس‌انداز تجمعی (میلیارد تومان) در برابر زیمنس",
+					label: "صرفه‌جویی در برابر زیمنس",
 					data: [], // To be populated
-					borderColor: "#f3722c", // Orange
+					borderColor: "#5341f3ff", // Orange
 					backgroundColor: "rgba(243, 114, 44, 0.1)",
 					borderWidth: 3,
 					fill: "start",
@@ -87,9 +87,9 @@ document.addEventListener("DOMContentLoaded", function () {
 					beginAtZero: true,
 					title: {
 						display: true,
-						text: "پس‌انداز تجمعی (میلیارد تومان)",
+						text: "مبلغ صرفه‌جویی (میلیارد تومان)",
 						font: {
-							family: "Montserrat",
+							family: "Vazirmatn",
 							size: 14,
 							weight: "600",
 						},
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
 						display: true,
 						text: "سال‌های بهره‌برداری",
 						font: {
-							family: "Montserrat",
+							family: "Vazirmatn",
 							size: 14,
 							weight: "600",
 						},
@@ -135,21 +135,13 @@ document.addEventListener("DOMContentLoaded", function () {
 					callbacks: {
 						// Tooltip formatting will be handled dynamically and localized
 						label: function (context) {
-							const mode = window.__chartMode || "kwh";
 							let label = context.dataset.label || "";
 							if (label) label += " — ";
 							if (context.parsed.y !== null) {
-								if (mode === "kwh") {
-									label +=
-										context.parsed.y.toLocaleString() +
-										" kWh";
-								} else {
-									label +=
-										context.parsed.y.toLocaleString(
-											undefined,
-											{ maximumFractionDigits: 2 }
-										) + " میلیارد تومان";
-								}
+								label +=
+									context.parsed.y.toLocaleString(undefined, {
+										maximumFractionDigits: 2,
+									}) + " میلیارد تومان";
 							}
 							return label;
 						},
@@ -183,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		savingsChart.data.datasets[0].data = abbData;
 		savingsChart.data.datasets[1].data = siemensData;
 		savingsChart.options.scales.y.title.text =
-			"پس‌انداز تجمعی (میلیارد تومان)";
+			"مبلغ صرفه‌جویی (میلیارد تومان)";
 		savingsChart.update();
 	}
 
@@ -200,4 +192,167 @@ document.addEventListener("DOMContentLoaded", function () {
 	// --- Initial Chart Render ---
 	// Initialize the chart with the slider's default value
 	updateChart(slider.value);
+
+	// --- Request Form Popup (contact) ---
+	const openRequestBtn = document.getElementById("openRequestForm");
+
+	function buildRequestFormHtml() {
+		return `
+		<div class="form-popup-backdrop" id="requestFormBackdrop">
+		  <div class="form-popup" role="dialog" aria-modal="true">
+		    <div class="form-close" id="requestFormClose">✕</div>
+		    <h3>فرم درخواست همکاری</h3>
+		    <form id="requestForm" novalidate>
+		      <div class="row">
+		        <div class="field">
+		          <label for="name">نام و نام خانوادگی <span style="color:#ff8080">*</span></label>
+		          <input id="name" name="name" required />
+		          <div class="error" data-for="name"></div>
+		        </div>
+		        <div class="field">
+		          <label for="phone">شماره تماس <span style="color:#ff8080">*</span></label>
+		          <input id="phone" name="phone" required placeholder="مثال: 0912xxxxxxx" />
+		          <div class="error" data-for="phone"></div>
+		        </div>
+		      </div>
+		      <div class="row">
+		        <div class="field">
+		          <label for="company">نام مجموعه </label>
+		          <input id="company" name="company" />
+		          <div class="error" data-for="company"></div>
+		        </div>
+		        <div class="field">
+		          <label for="email">ایمیل </label>
+		          <input id="email" name="email" type="email" placeholder="user@example.com" />
+		          <div class="error" data-for="email"></div>
+		        </div>
+		      </div>
+		      <div class="field">
+		        <label for="message">متن پیام <span style="color:#ff8080">*</span></label>
+		        <textarea id="message" name="message" required></textarea>
+		        <div class="error" data-for="message"></div>
+		      </div>
+		      <div class="actions">
+		        <button type="button" class="btn btn-cancel" id="requestFormCancel">انصراف</button>
+		        <button type="submit" class="btn btn-send">ارسال</button>
+		      </div>
+		    </form>
+		  </div>
+		</div>
+		`;
+	}
+
+	function showToast(text) {
+		const t = document.createElement("div");
+		t.className = "toast";
+		t.textContent = text;
+		document.body.appendChild(t);
+		setTimeout(() => (t.style.opacity = "1"), 20);
+		setTimeout(() => {
+			t.style.opacity = "0";
+			setTimeout(() => t.remove(), 300);
+		}, 3000);
+	}
+
+	function openRequestForm() {
+		// don't open multiple
+		if (document.getElementById("requestFormBackdrop")) return;
+		const html = buildRequestFormHtml();
+		document.body.insertAdjacentHTML("beforeend", html);
+		const backdrop = document.getElementById("requestFormBackdrop");
+		const close = document.getElementById("requestFormClose");
+		const cancel = document.getElementById("requestFormCancel");
+		const form = document.getElementById("requestForm");
+
+		// focus first field
+		document.getElementById("name").focus();
+
+		function clean() {
+			backdrop.remove();
+		}
+
+		backdrop.addEventListener("click", (ev) => {
+			if (ev.target === backdrop) clean();
+		});
+		close.addEventListener("click", clean);
+		cancel.addEventListener("click", clean);
+
+		// stop propagation so underlying elements don't react
+		backdrop.addEventListener("wheel", (e) => e.stopPropagation(), {
+			passive: false,
+		});
+		backdrop.addEventListener("touchmove", (e) => e.stopPropagation(), {
+			passive: false,
+		});
+
+		// validation helpers
+		function setError(name, msg) {
+			const el = form.querySelector(`[data-for="${name}"]`);
+			const input = form.querySelector(`[name="${name}"]`);
+			if (el) el.textContent = msg || "";
+			if (input) {
+				if (msg) input.classList.add("invalid");
+				else input.classList.remove("invalid");
+			}
+		}
+
+		function validate() {
+			let ok = true;
+			const name = form.name.value.trim();
+			const phone = form.phone.value.trim();
+			const email = form.email.value.trim();
+			const message = form.message.value.trim();
+
+			if (!name) {
+				setError("name", "نام و نام خانوادگی الزامی است");
+				ok = false;
+			} else setError("name", "");
+			if (!phone) {
+				setError("phone", "شماره تماس الزامی است");
+				ok = false;
+			} else {
+				const p = phone.replace(/\s|-/g, "");
+				if (!/^\+?\d{7,15}$/.test(p)) {
+					setError("phone", "شماره تماس معتبر نیست");
+					ok = false;
+				} else setError("phone", "");
+			}
+			if (email) {
+				// simple email check
+				if (!/^\S+@\S+\.\S+$/.test(email)) {
+					setError("email", "ایمیل معتبر نیست");
+					ok = false;
+				} else setError("email", "");
+			} else setError("email", "");
+			if (!message) {
+				setError("message", "متن پیام الزامی است");
+				ok = false;
+			} else setError("message", "");
+			return ok;
+		}
+
+		// live clear errors
+		form.addEventListener("input", (ev) => {
+			const name = ev.target.name;
+			if (!name) return;
+			setError(name, "");
+		});
+
+		form.addEventListener("submit", (ev) => {
+			ev.preventDefault();
+			if (!validate()) return;
+			// fake submit: show toast and close
+			showToast("پیام شما ارسال شد. متشکریم!");
+			setTimeout(() => {
+				clean();
+				form.reset();
+			}, 600);
+		});
+	}
+
+	if (openRequestBtn)
+		openRequestBtn.addEventListener("click", (e) => {
+			e.preventDefault();
+			openRequestForm();
+		});
 });
