@@ -340,8 +340,7 @@ document.addEventListener("DOMContentLoaded", function () {
       ev.preventDefault();
       if (!validate()) return;
 
-      const WEBHOOK_URL =
-        "https://n8n.mirka.agency/webhook-test/landing-form-data";
+      const WEBHOOK_URL = "https://n8n.mirka.agency/webhook/landing-form-data";
       const formData = new FormData(form);
       const data = {};
       formData.forEach((value, key) => {
