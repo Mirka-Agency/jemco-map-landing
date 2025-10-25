@@ -1,785 +1,758 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		<title>جمکو بر روی نقشه</title>
-		<link
-			href="assets/fonts/vazirmatn-v33.003/Vazirmatn-Variable-font-face.css"
-			rel="stylesheet"
-		/>
-		<link rel="icon" href="assets/img/fav.png" sizes="192x192" />
-		<style>
-			:root {
-				--bg: #071022; /* dark deep */
-				--panel: #0f1724cc;
-				--accent: #6ee7b7;
-				--accent-2: #7c5cff;
-				--muted: #9aa8b2;
-				--glass: rgba(255, 255, 255, 0.04);
-				--neon: 0 0 16px rgba(124, 92, 255, 0.22),
-					0 0 40px rgba(110, 231, 183, 0.06);
-				--ui-size: 56px;
-			}
-			/* Target the scrollbar */
-			::-webkit-scrollbar {
-				width: 6px;
-				height: 6px;
-			}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>جمکو بر روی نقشه</title>
+    <link
+      href="assets/fonts/vazirmatn-v33.003/Vazirmatn-Variable-font-face.css"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="assets/img/fav.png" sizes="192x192" />
+    <style>
+      :root {
+        --bg: #071022; /* dark deep */
+        --panel: #0f1724cc;
+        --accent: #6ee7b7;
+        --accent-2: #7c5cff;
+        --muted: #9aa8b2;
+        --glass: rgba(255, 255, 255, 0.04);
+        --neon: 0 0 16px rgba(124, 92, 255, 0.22),
+          0 0 40px rgba(110, 231, 183, 0.06);
+        --ui-size: 56px;
+      }
+      /* Target the scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
 
-			/* Track (background) */
-			::-webkit-scrollbar-track {
-				background: var(--bg);
-				border-radius: 6px;
-			}
+      /* Track (background) */
+      ::-webkit-scrollbar-track {
+        background: var(--bg);
+        border-radius: 6px;
+      }
 
-			/* Handle (thumb) */
-			::-webkit-scrollbar-thumb {
-				background: #243a5ecc;
-				border-radius: 6px;
-			}
+      /* Handle (thumb) */
+      ::-webkit-scrollbar-thumb {
+        background: #243a5ecc;
+        border-radius: 6px;
+      }
 
-			/* Handle on hover */
-			::-webkit-scrollbar-thumb:hover {
-				background: #243a5ecc;
-			}
+      /* Handle on hover */
+      ::-webkit-scrollbar-thumb:hover {
+        background: #243a5ecc;
+      }
 
-			html,
-			body {
-				height: 100%;
-				margin: 0;
-				font-family: "Vazirmatn", ui-sans-serif, system-ui,
-					-apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-			}
-			body {
-				background: radial-gradient(
-						circle at 10% 10%,
-						rgba(124, 92, 255, 0.06),
-						transparent 10%
-					),
-					linear-gradient(180deg, #04101a 0%, var(--bg) 60%);
-				color: #dfe9f2;
-				overflow: hidden;
-			}
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: "Vazirmatn", ui-sans-serif, system-ui, -apple-system,
+          "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      }
+      body {
+        background: radial-gradient(
+            circle at 10% 10%,
+            rgba(124, 92, 255, 0.06),
+            transparent 10%
+          ),
+          linear-gradient(180deg, #04101a 0%, var(--bg) 60%);
+        color: #dfe9f2;
+        overflow: hidden;
+      }
 
-			#stars {
-				position: fixed;
-				left: 0;
-				top: 0;
-				right: 0;
-				bottom: 0;
-				pointer-events: none;
-				mix-blend-mode: screen;
-				opacity: 0.5;
-			}
+      #stars {
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        mix-blend-mode: screen;
+        opacity: 0.5;
+      }
 
-			.app {
-				height: 100%;
-				display: grid;
-				grid-template-columns: 1fr;
-				align-items: center;
-				justify-items: center;
-				padding: 28px;
-			}
+      .app {
+        height: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: center;
+        justify-items: center;
+        padding: 28px;
+      }
 
-			.controls {
-				position: fixed;
-				right: 22px;
-				top: 22px;
-				display: flex;
-				flex-direction: column;
-				gap: 12px;
-				z-index: 60;
-			}
-			.toggle-group {
-				display: flex;
-				flex-direction: column;
-				gap: 10px;
-				align-items: flex-end;
-			}
+      .controls {
+        position: fixed;
+        right: 22px;
+        top: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 60;
+      }
+      .toggle-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-end;
+      }
 
-			.btn {
-				width: var(--ui-size);
-				height: var(--ui-size);
-				display: inline-grid;
-				place-items: center;
-				border-radius: 12px;
-				background-color: #eee;
-				backdrop-filter: blur(6px);
-				box-shadow: var(--neon);
-				border: 1px solid rgba(255, 255, 255, 0.04);
-				cursor: pointer;
-			}
-			.btn svg {
-				width: 22px;
-				height: 22px;
-				opacity: 0.95;
-			}
-			.btn:active {
-				transform: translateY(2px) scale(0.99);
-			}
-			.group-toggle {
-				/* padding: 8px 12px; */
-				border-radius: 999px;
-				background: linear-gradient(
-					90deg,
-					rgba(255, 255, 255, 0.02),
-					rgba(255, 255, 255, 0.01)
-				);
-				border: 1px solid rgba(255, 255, 255, 0.03);
-				display: flex;
-				gap: 8px;
-				align-items: center;
-			}
+      .btn {
+        width: var(--ui-size);
+        height: var(--ui-size);
+        display: inline-grid;
+        place-items: center;
+        border-radius: 12px;
+        background-color: #eee;
+        backdrop-filter: blur(6px);
+        box-shadow: var(--neon);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        cursor: pointer;
+      }
+      .btn svg {
+        width: 22px;
+        height: 22px;
+        opacity: 0.95;
+      }
+      .btn:active {
+        transform: translateY(2px) scale(0.99);
+      }
+      .group-toggle {
+        /* padding: 8px 12px; */
+        border-radius: 999px;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
 
-			.viewport {
-				width: 100%;
-				max-width: 75vw;
-				height: 78vh;
-				background: linear-gradient(
-					180deg,
-					rgba(12, 20, 30, 0.35),
-					rgba(6, 10, 14, 0.4)
-				);
-				border-radius: 18px;
-				padding: 18px;
-				box-shadow: 0 10px 40px rgba(2, 6, 12, 0.6);
-				position: relative;
-				overflow: hidden;
-				border: 10px solid #224;
-			}
+      .viewport {
+        width: 100%;
+        max-width: 75vw;
+        height: 78vh;
+        background: linear-gradient(
+          180deg,
+          rgba(12, 20, 30, 0.35),
+          rgba(6, 10, 14, 0.4)
+        );
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 10px 40px rgba(2, 6, 12, 0.6);
+        position: relative;
+        overflow: hidden;
+        border: 10px solid #224;
+      }
 
-			.map-frame {
-				position: absolute;
-				inset: 0;
-				border-radius: 12px;
-				overflow: hidden;
-				background: linear-gradient(
-					180deg,
-					rgba(0, 0, 0, 0.12),
-					rgba(0, 0, 0, 0.18)
-				);
-			}
-			.map-inner {
-				position: absolute;
-				left: 50%;
-				top: 50%;
-				transform-origin: 0 0;
-				/* will-change: transform; */
-				touch-action: none;
-			}
+      .map-frame {
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.12),
+          rgba(0, 0, 0, 0.18)
+        );
+      }
+      .map-inner {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform-origin: 0 0;
+        /* will-change: transform; */
+        touch-action: none;
+      }
 
-			/* navy-blue tint overlay applied over the map image */
-			.map-inner::before {
-				content: "";
-				position: absolute;
-				inset: 0;
-				pointer-events: none;
-				z-index: 10; /* behind markers (markers have z-index:40) */
-			}
+      /* navy-blue tint overlay applied over the map image */
+      .map-inner::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 10; /* behind markers (markers have z-index:40) */
+      }
 
-			.map-img {
-				display: block;
-				max-width: none;
-				user-select: none;
-				pointer-events: none;
+      .map-img {
+        display: block;
+        max-width: none;
+        user-select: none;
+        pointer-events: none;
 
-				position: relative;
-				z-index: 0;
-			}
+        position: relative;
+        z-index: 0;
+      }
 
-			.marker {
-				position: absolute;
-				transform: translate(-50%, -50%);
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				gap: 15px;
-				cursor: pointer;
-				transition: transform 0.18s cubic-bezier(0.16, 0.8, 0.3, 1),
-					filter 0.18s;
-				z-index: 40;
-			}
-			.marker .badge {
-				width: 85px;
-				height: 85px;
-				/* 	border-radius: 12px; */
-				display: grid;
-				place-items: center;
-				/* 	background: linear-gradient(
+      .marker {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        cursor: pointer;
+        transition: transform 0.18s cubic-bezier(0.16, 0.8, 0.3, 1),
+          filter 0.18s;
+        z-index: 40;
+      }
+      .marker .badge {
+        width: 85px;
+        height: 85px;
+        /* 	border-radius: 12px; */
+        display: grid;
+        place-items: center;
+        /* 	background: linear-gradient(
 					180deg,
 					var(--accent),
 					var(--accent-2)
 				); */
-				/* 	box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
+        /* 	box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
 				border: 1px solid rgba(255, 255, 255, 0.06); */
-				font-weight: 700;
-				color: #041022;
-			}
+        font-weight: 700;
+        color: #041022;
+      }
 
-			.marker-glow .badge {
-				width: 150px !important;
-				height: 150px !important;
-			}
-			.marker .badge img {
-				width: 100%;
-				height: 100%;
-			}
-			.marker[data-group="sales"] .badge {
-				/* background: linear-gradient(180deg, #ffd166, #ff8a5b); */
-			}
-			.marker[data-type="office"] .badge {
-				/* 	background: linear-gradient(180deg, #8ef3ff, #49c2ff);
+      .marker-glow .badge {
+        width: 150px !important;
+        height: 150px !important;
+      }
+      .marker .badge img {
+        width: 100%;
+        height: 100%;
+      }
+      .marker[data-group="sales"] .badge {
+        /* background: linear-gradient(180deg, #ffd166, #ff8a5b); */
+      }
+      .marker[data-type="office"] .badge {
+        /* 	background: linear-gradient(180deg, #8ef3ff, #49c2ff);
 				border-radius: 50%; */
-			}
-			.marker[data-type="factory"] .badge {
-				/* 	background: linear-gradient(180deg, #ff9ac2, #ff5e9e);
+      }
+      .marker[data-type="factory"] .badge {
+        /* 	background: linear-gradient(180deg, #ff9ac2, #ff5e9e);
 				border-radius: 50%; */
-			}
-			.marker:hover {
-				transform: translate(-50%, -50%) scale(1.12);
-			}
-			.marker .label {
-				font-size: 1.3rem;
-				background: var(--panel);
-				padding: 6px 9px;
-				border-radius: 8px;
-				border: 1px solid rgba(255, 255, 255, 0.03);
-				/* backdrop-filter: blur(6px); */
-				white-space: nowrap;
-			}
+      }
+      .marker:hover {
+        transform: translate(-50%, -50%) scale(1.12);
+      }
+      .marker .label {
+        font-size: 1.3rem;
+        background: var(--panel);
+        padding: 6px 9px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        /* backdrop-filter: blur(6px); */
+        white-space: nowrap;
+      }
 
-			/* popup: semi full-screen */
-			.popup-full-backdrop {
-				position: fixed;
-				inset: 0;
-				background: linear-gradient(
-					180deg,
-					rgba(2, 6, 12, 0.6),
-					rgba(2, 6, 12, 0.8)
-				);
-				backdrop-filter: blur(6px);
-				z-index: 120;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-			}
-			.popup-full {
-				width: 92vw;
-				max-width: 80vw;
-				height: 86vh;
-				border-radius: 14px;
-				background: linear-gradient(
-					180deg,
-					rgba(8, 12, 18, 0.98),
-					rgba(6, 8, 12, 0.98)
-				);
-				box-shadow: 0 30px 80px rgba(2, 6, 12, 0.75);
-				border: 1px solid rgba(255, 255, 255, 0.04);
-				display: flex;
-				overflow: hidden;
-				position: relative;
-			}
-			.popup-left {
-				flex: 0 0 42%;
-				min-width: 320px;
-				background: linear-gradient(
-					180deg,
-					rgba(255, 255, 255, 0.02),
-					rgba(255, 255, 255, 0.01)
-				);
-				display: flex;
-				align-items: center;
-				justify-content: center;
-			}
-			.popup-left img {
-				max-width: 100%;
-				max-height: 100%;
-				height: 100%;
-				width: 100%;
-				object-fit: cover;
-				border-radius: 8px 0 0 8px;
-				box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
-			}
-			.popup-right {
-				flex: 1;
-				padding: 22px 26px;
-				overflow: auto;
-				direction: rtl;
-			}
-			.popup-right h2 {
-				margin: 0 0 8px 0;
-				font-size: 20px;
-			}
-			.popup-right p {
-				color: var(--muted);
-				line-height: 1.5;
-			}
-			.popup-actions {
-				margin-top: 16px;
-				display: flex;
-				gap: 10px;
-			}
-			.close {
-				width: 36px;
-				height: 36px;
-				border-radius: 8px;
-				display: grid;
-				place-items: center;
-				cursor: pointer !important;
-			}
+      /* popup: semi full-screen */
+      .popup-full-backdrop {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(2, 6, 12, 0.6),
+          rgba(2, 6, 12, 0.8)
+        );
+        backdrop-filter: blur(6px);
+        z-index: 120;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .popup-full {
+        width: 92vw;
+        max-width: 80vw;
+        height: 86vh;
+        border-radius: 14px;
+        background: linear-gradient(
+          180deg,
+          rgba(8, 12, 18, 0.98),
+          rgba(6, 8, 12, 0.98)
+        );
+        box-shadow: 0 30px 80px rgba(2, 6, 12, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        display: flex;
+        overflow: hidden;
+        position: relative;
+      }
+      .popup-left {
+        flex: 0 0 42%;
+        min-width: 320px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .popup-left img {
+        max-width: 100%;
+        max-height: 100%;
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 8px 0 0 8px;
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
+      }
+      .popup-right {
+        flex: 1;
+        padding: 22px 26px;
+        overflow: auto;
+        direction: rtl;
+      }
+      .popup-right h2 {
+        margin: 0 0 8px 0;
+        font-size: 20px;
+      }
+      .popup-right p {
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .popup-actions {
+        margin-top: 16px;
+        display: flex;
+        gap: 10px;
+      }
+      .close {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        cursor: pointer !important;
+      }
 
-			.legend {
-				position: fixed;
-				left: 22px;
-				top: 22px;
-				background: var(--panel);
-				padding: 10px;
-				border-radius: 12px;
-				border: 1px solid rgba(255, 255, 255, 0.03);
-				backdrop-filter: blur(6px);
-				z-index: 60;
-			}
-			.legend h3 {
-				margin: 0 0 8px 0;
-				font-size: 13px;
-			}
+      .legend {
+        position: fixed;
+        left: 22px;
+        top: 22px;
+        background: var(--panel);
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(6px);
+        z-index: 60;
+      }
+      .legend h3 {
+        margin: 0 0 8px 0;
+        font-size: 13px;
+      }
 
-			.hint {
-				direction: rtl;
-				position: fixed;
-				right: 22px;
-				bottom: 22px;
-				background: linear-gradient(
-					90deg,
-					rgba(255, 255, 255, 0.02),
-					rgba(255, 255, 255, 0.01)
-				);
-				padding: 10px;
-				border-radius: 12px;
-				border: 1px solid rgba(255, 255, 255, 0.03);
-				font-size: 13px;
-			}
+      .hint {
+        direction: rtl;
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        font-size: 13px;
+      }
 
-			.copyright {
-				direction: ltr;
-				position: fixed;
-				left: 22px;
-				bottom: 22px;
-				background: linear-gradient(
-					90deg,
-					rgba(255, 255, 255, 0.02),
-					rgba(255, 255, 255, 0.01)
-				);
-				padding: 10px;
-				border-radius: 12px;
-				border: 1px solid rgba(255, 255, 255, 0.03);
-				font-size: 13px;
-			}
-			@media (max-width: 900px) {
-				:root {
-					--ui-size: 48px;
-				}
+      .copyright {
+        direction: ltr;
+        position: fixed;
+        left: 22px;
+        bottom: 22px;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        font-size: 13px;
+      }
+      @media (max-width: 900px) {
+        :root {
+          --ui-size: 48px;
+        }
 
-				/* larger iframe popup (90% of viewport) */
-				.popup-full.popup-iframe {
-					width: 90vw;
-					height: 90vh;
-					max-width: none;
-				}
-				.popup-full.popup-iframe .close {
-					position: absolute;
-					top: 12px;
-					right: 12px;
-					z-index: 130;
-					background: rgba(255, 255, 255, 0.04);
-				}
-				.viewport {
-					height: 72vh;
-				}
-			}
-			@media (max-width: 560px) {
-				.marker .badge {
-					width: 40px;
-					height: 40px;
-				}
-				.marker .label {
-					display: none;
-				}
-				.popup-left {
-					display: none;
-				}
-				.popup-full {
-					width: 96vw;
-					height: 86vh;
-				}
-			}
+        /* larger iframe popup (90% of viewport) */
+        .popup-full.popup-iframe {
+          width: 90vw;
+          height: 90vh;
+          max-width: none;
+        }
+        .popup-full.popup-iframe .close {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          z-index: 130;
+          background: rgba(255, 255, 255, 0.04);
+        }
+        .viewport {
+          height: 72vh;
+        }
+      }
+      @media (max-width: 560px) {
+        .marker .badge {
+          width: 40px;
+          height: 40px;
+        }
+        .marker .label {
+          display: none;
+        }
+        .popup-left {
+          display: none;
+        }
+        .popup-full {
+          width: 96vw;
+          height: 86vh;
+        }
+      }
 
-			@keyframes popupIn {
-				0% {
-					opacity: 0;
-					transform: translateY(10px) scale(0.99);
-				}
-				100% {
-					opacity: 1;
-					transform: translateY(0) scale(1);
-				}
-			}
-			.popup-animate {
-				animation: popupIn 0.32s cubic-bezier(0.22, 0.9, 0.2, 1);
-			}
+      @keyframes popupIn {
+        0% {
+          opacity: 0;
+          transform: translateY(10px) scale(0.99);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .popup-animate {
+        animation: popupIn 0.32s cubic-bezier(0.22, 0.9, 0.2, 1);
+      }
 
-			@keyframes pulse {
-				0% {
-					transform: scale(0.9);
-				}
-				50% {
-					transform: scale(1.06);
-				}
-				100% {
-					transform: scale(0.9);
-				}
-			}
-			.pulse {
-				animation: pulse 3s ease-in-out infinite;
-			}
+      @keyframes pulse {
+        0% {
+          transform: scale(0.9);
+        }
+        50% {
+          transform: scale(1.06);
+        }
+        100% {
+          transform: scale(0.9);
+        }
+      }
+      .pulse {
+        animation: pulse 3s ease-in-out infinite;
+      }
 
-			.titlebar {
-				text-align: right;
-				position: fixed;
-				left: 50%;
-				transform: translateX(-50%);
-				top: 14px;
-				z-index: 70;
-				padding: 10px 18px;
-				border-radius: 999px;
-				background: linear-gradient(
-					90deg,
-					rgba(255, 255, 255, 0.02),
-					rgba(255, 255, 255, 0.01)
-				);
-				border: 1px solid rgba(255, 255, 255, 0.03);
-				backdrop-filter: blur(6px);
-				display: flex;
-				gap: 14px;
-				align-items: center;
-			}
-			.titlebar h1 {
-				margin: 0;
-				font-size: 16px;
-				letter-spacing: 0.6px;
-			}
-			.titlebar small {
-				display: block;
-				font-size: 12px;
-				color: var(--muted);
-			}
-			.audio-toggle {
-				display: inline-grid;
-				place-items: center;
-				width: 36px;
-				height: 36px;
-				border-radius: 8px;
-				background: rgba(255, 255, 255, 0.02);
-				border: 1px solid rgba(255, 255, 255, 0.03);
-				cursor: pointer;
-			}
+      .titlebar {
+        text-align: right;
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 14px;
+        z-index: 70;
+        padding: 10px 18px;
+        border-radius: 999px;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(6px);
+        display: flex;
+        gap: 14px;
+        align-items: center;
+      }
+      .titlebar h1 {
+        margin: 0;
+        font-size: 16px;
+        letter-spacing: 0.6px;
+      }
+      .titlebar small {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .audio-toggle {
+        display: inline-grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        cursor: pointer;
+      }
 
-			.sales-popup-item {
-				background-color: rgba(185, 185, 225, 0.2);
-				padding: 12px;
-				border-radius: 12px;
-				margin-bottom: 12px;
-			}
+      .sales-popup-item {
+        background-color: rgba(185, 185, 225, 0.2);
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+      }
 
-			.sales-popup-item h4 {
-				font-size: 1.4rem;
-				font-weight: bold;
-			}
+      .sales-popup-item h4 {
+        font-size: 1.4rem;
+        font-weight: bold;
+      }
 
-			iframe {
-				border-radius: 15px;
-			}
+      iframe {
+        border-radius: 15px;
+      }
 
-			.inline-popup-image {
-				width: 100%;
-				object-fit: contain;
-				margin: 12px;
-				border-radius: 12px;
-			}
+      .inline-popup-image {
+        width: 100%;
+        object-fit: contain;
+        margin: 12px;
+        border-radius: 12px;
+      }
 
-			.popup-full.popup-iframe {
-				border: 5px solid #fff;
-			}
-		</style>
+      .popup-full.popup-iframe {
+        border: 5px solid #fff;
+      }
+    </style>
 
-		<link rel="preload" as="image" href="assets/img/sales/kerman.jpg" />
-		<link rel="preload" as="image" href="assets/img/sales/mashhad.jpg" />
-		<link rel="preload" as="image" href="assets/img/sales/hamedan.jpg" />
-		<link rel="preload" as="image" href="assets/img/sales/isfahan.jpg" />
-		<link rel="preload" as="image" href="assets/img/sales/khozestan.jpg" />
-		<link rel="preload" as="image" href="assets/img/sales/kurdistan.jpg" />
-		<link rel="preload" as="image" href="assets/img/sales/qazvin.jpg" />
-		<link rel="preload" as="image" href="assets/img/sales/tabriz.jpg" />
-		<link rel="preload" as="image" href="assets/img/sales/tehran.jpg" />
-		<link rel="preload" as="image" href="assets/img/sales/zanjan.jpg" />
+    <link rel="preload" as="image" href="assets/img/sales/kerman.jpg" />
+    <link rel="preload" as="image" href="assets/img/sales/mashhad.jpg" />
+    <link rel="preload" as="image" href="assets/img/sales/hamedan.jpg" />
+    <link rel="preload" as="image" href="assets/img/sales/isfahan.jpg" />
+    <link rel="preload" as="image" href="assets/img/sales/khozestan.jpg" />
+    <link rel="preload" as="image" href="assets/img/sales/kurdistan.jpg" />
+    <link rel="preload" as="image" href="assets/img/sales/qazvin.jpg" />
+    <link rel="preload" as="image" href="assets/img/sales/tabriz.jpg" />
+    <link rel="preload" as="image" href="assets/img/sales/tehran.jpg" />
+    <link rel="preload" as="image" href="assets/img/sales/zanjan.jpg" />
 
-		<link
-			rel="preload"
-			as="image"
-			href="assets/img/projects/foulad-gharb.jpg"
-		/>
-		<link
-			rel="preload"
-			as="image"
-			href="assets/img/projects/foulad-khozestan.jpg"
-		/>
-		<link
-			rel="preload"
-			as="image"
-			href="assets/img/projects/foulad-mobarake.jpg"
-		/>
-		<link
-			rel="preload"
-			as="image"
-			href="assets/img/projects/foulad-neshabour.jpg"
-		/>
-		<link
-			rel="preload"
-			as="image"
-			href="assets/img/projects/foulad-sabzevar.jpg"
-		/>
-		<link
-			rel="preload"
-			as="image"
-			href="assets/img/projects/foulad-sirjan.jpg"
-		/>
-		<link
-			rel="preload"
-			as="image"
-			href="assets/img/projects/ghori-cement.jpg"
-		/>
-		<link rel="preload" as="image" href="assets/img/projects/golghr.jpg" />
-		<link
-			rel="preload"
-			as="image"
-			href="assets/img/projects/mes-meydok.jpg"
-		/>
-		<link
-			rel="preload"
-			as="image"
-			href="assets/img/projects/siman-faraz.jpg"
-		/>
-		<link
-			rel="preload"
-			as="image"
-			href="assets/img/projects/siman-sabzevar.jpg"
-		/>
-		<link
-			rel="preload"
-			as="image"
-			href="assets/img/projects/zobahan-pasargad.jpg"
-		/>
-		<link
-			rel="preload"
-			as="image"
-			href="assets/img/projects/siman-turkamanestan.jpg"
-		/>
+    <link
+      rel="preload"
+      as="image"
+      href="assets/img/projects/foulad-gharb.jpg"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="assets/img/projects/foulad-khozestan.jpg"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="assets/img/projects/foulad-mobarake.jpg"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="assets/img/projects/foulad-neshabour.jpg"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="assets/img/projects/foulad-sabzevar.jpg"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="assets/img/projects/foulad-sirjan.jpg"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="assets/img/projects/ghori-cement.jpg"
+    />
+    <link rel="preload" as="image" href="assets/img/projects/golghr.jpg" />
+    <link rel="preload" as="image" href="assets/img/projects/mes-meydok.jpg" />
+    <link rel="preload" as="image" href="assets/img/projects/siman-faraz.jpg" />
+    <link
+      rel="preload"
+      as="image"
+      href="assets/img/projects/siman-sabzevar.jpg"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="assets/img/projects/zobahan-pasargad.jpg"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="assets/img/projects/siman-turkamanestan.jpg"
+    />
 
-		<link rel="preload" as="image" href="assets/img/bg1.jpg" />
-	</head>
-	<body>
-		<canvas id="stars"></canvas>
+    <link rel="preload" as="image" href="assets/img/bg1.jpg" />
+  </head>
+  <body>
+    <canvas id="stars"></canvas>
 
-		<!-- Audio elements (replace src with your files) -->
-		<audio id="bgAudio" loop autoplay>
-			<!-- Provide your background music file here (mp3/ogg). Autoplay may be blocked until user interacts. -->
-			<source src="assets/audio/bg.mp3" type="audio/mpeg" />
-		</audio>
-		<audio id="clickAudio" preload="auto">
-			<!-- Provide your click/open sound here -->
-			<source src="assets/audio/tap.mp3" type="audio/mpeg" />
-		</audio>
+    <!-- Audio elements (replace src with your files) -->
+    <audio id="bgAudio" loop autoplay>
+      <!-- Provide your background music file here (mp3/ogg). Autoplay may be blocked until user interacts. -->
+      <source src="assets/audio/bg.mp3" type="audio/mpeg" />
+    </audio>
+    <audio id="clickAudio" preload="auto">
+      <!-- Provide your click/open sound here -->
+      <source src="assets/audio/tap.mp3" type="audio/mpeg" />
+    </audio>
 
-		<div class="titlebar">
-			<div style="display: flex; flex-direction: column">
-				<h1>شرکت جمکو و راهکار های فولاد و معدن</h1>
-				<small>هلدینگ صنایع معدنی کاوه پارس </small>
-			</div>
-			<div style="width: 18px"></div>
-			<div
-				title="Toggle background audio"
-				id="audioToggle"
-				class="audio-toggle"
-			>
-				▶
-			</div>
-		</div>
+    <div class="titlebar">
+      <div style="display: flex; flex-direction: column">
+        <h1>شرکت جمکو و راهکار های فولاد و معدن</h1>
+        <small>هلدینگ صنایع معدنی کاوه پارس </small>
+      </div>
+      <div style="width: 18px"></div>
+      <div
+        title="Toggle background audio"
+        id="audioToggle"
+        class="audio-toggle"
+      >
+        ▶
+      </div>
+    </div>
 
-		<div class="legend">
-			<img src="assets/img/jemco-white.png" style="width: 120px" />
-			<div style="display: none">
-				<h3>Legend</h3>
-				<div style="display: flex; gap: 8px; align-items: center">
-					<div
-						style="
-							width: 14px;
-							height: 14px;
-							border-radius: 4px;
-							background: linear-gradient(
-								180deg,
-								var(--accent),
-								var(--accent-2)
-							);
-						"
-					></div>
-					<div style="font-size: 13px">Project</div>
-				</div>
-				<div
-					style="
-						display: flex;
-						gap: 8px;
-						align-items: center;
-						margin-top: 6px;
-					"
-				>
-					<div
-						style="
-							width: 14px;
-							height: 14px;
-							border-radius: 50%;
-							background: linear-gradient(
-								180deg,
-								#8ef3ff,
-								#49c2ff
-							);
-						"
-					></div>
-					<div style="font-size: 13px">Office</div>
-				</div>
-				<div
-					style="
-						display: flex;
-						gap: 8px;
-						align-items: center;
-						margin-top: 6px;
-					"
-				>
-					<div
-						style="
-							width: 14px;
-							height: 14px;
-							border-radius: 50%;
-							background: linear-gradient(
-								180deg,
-								#ff9ac2,
-								#ff5e9e
-							);
-						"
-					></div>
-					<div style="font-size: 13px">Factory</div>
-				</div>
-			</div>
-		</div>
+    <div class="legend">
+      <img src="assets/img/jemco-white.png" style="width: 120px" />
+      <div style="display: none">
+        <h3>Legend</h3>
+        <div style="display: flex; gap: 8px; align-items: center">
+          <div
+            style="
+              width: 14px;
+              height: 14px;
+              border-radius: 4px;
+              background: linear-gradient(
+                180deg,
+                var(--accent),
+                var(--accent-2)
+              );
+            "
+          ></div>
+          <div style="font-size: 13px">Project</div>
+        </div>
+        <div
+          style="display: flex; gap: 8px; align-items: center; margin-top: 6px"
+        >
+          <div
+            style="
+              width: 14px;
+              height: 14px;
+              border-radius: 50%;
+              background: linear-gradient(180deg, #8ef3ff, #49c2ff);
+            "
+          ></div>
+          <div style="font-size: 13px">Office</div>
+        </div>
+        <div
+          style="display: flex; gap: 8px; align-items: center; margin-top: 6px"
+        >
+          <div
+            style="
+              width: 14px;
+              height: 14px;
+              border-radius: 50%;
+              background: linear-gradient(180deg, #ff9ac2, #ff5e9e);
+            "
+          ></div>
+          <div style="font-size: 13px">Factory</div>
+        </div>
+      </div>
+    </div>
 
-		<div class="controls">
-			<div class="toggle-group">
-				<div class="group-toggle" id="projects-toggle">
-					<label for="projects-checkbox">پروژه های جمکو</label>
-					<input
-						type="checkbox"
-						id="projects-checkbox"
-						name="projects-checkbox"
-						checked
-						style="accent-color: var(--accent); margin-right: 6px"
-					/>
-				</div>
-				<div class="group-toggle" id="sales-toggle">
-					<label for="sales-checkbox">نمایندگان فروش</label>
-					<input
-						type="checkbox"
-						id="sales-checkbox"
-						name="sales-checkbox"
-						checked
-						style="accent-color: #ff8a5b; margin-right: 6px"
-					/>
-				</div>
-			</div>
-			<div style="height: 8px"></div>
-			<div
-				style="
-					display: flex;
-					flex-direction: column;
-					gap: 8px;
-					align-items: end;
-				"
-			>
-				<button class="btn" id="zoom-in" title="Zoom in">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="1.6"
-							d="M12 5v14M5 12h14"
-						/>
-					</svg>
-				</button>
-				<button class="btn" id="zoom-out" title="Zoom out">
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="1.6"
-							d="M5 12h14"
-						/>
-					</svg>
-				</button>
-			</div>
-		</div>
+    <div class="controls">
+      <div class="toggle-group">
+        <div class="group-toggle" id="projects-toggle">
+          <label for="projects-checkbox">پروژه های جمکو</label>
+          <input
+            type="checkbox"
+            id="projects-checkbox"
+            name="projects-checkbox"
+            checked
+            style="accent-color: var(--accent); margin-right: 6px"
+          />
+        </div>
+        <div class="group-toggle" id="sales-toggle">
+          <label for="sales-checkbox">نمایندگان فروش</label>
+          <input
+            type="checkbox"
+            id="sales-checkbox"
+            name="sales-checkbox"
+            checked
+            style="accent-color: #ff8a5b; margin-right: 6px"
+          />
+        </div>
+      </div>
+      <div style="height: 8px"></div>
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          align-items: end;
+        "
+      >
+        <button class="btn" id="zoom-in" title="Zoom in">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.6"
+              d="M12 5v14M5 12h14"
+            />
+          </svg>
+        </button>
+        <button class="btn" id="zoom-out" title="Zoom out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.6"
+              d="M5 12h14"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
 
-		<div class="app">
-			<div class="viewport" id="viewport">
-				<div class="map-frame">
-					<div
-						class="map-inner"
-						id="mapInner"
-						style="
-							left: 50%;
-							top: 50%;
-							transform: translate(-50%, -50%) scale(1)
-								translate(0px, 0px);
-						"
-					>
-						<img
-							src="assets/img/map.png"
-							alt="map"
-							class="map-img"
-							id="mapImage"
-						/>
+    <div class="app">
+      <div class="viewport" id="viewport">
+        <div class="map-frame">
+          <div
+            class="map-inner"
+            id="mapInner"
+            style="
+              left: 50%;
+              top: 50%;
+              transform: translate(-50%, -50%) scale(1) translate(0px, 0px);
+            "
+          >
+            <img
+              src="assets/img/map.png"
+              alt="map"
+              class="map-img"
+              id="mapImage"
+            />
 
-						<div
-							class="marker marker-glow"
-							data-id="p2"
-							data-group="projects"
-							data-x="85"
-							data-y="102"
-							data-url="/msc.html"
-							data-image=""
-						>
-							<div class="badge">
-								<img src="assets/img/projects/msc2.png" />
-							</div>
-							<div class="label">فولاد مبارکه</div>
-						</div>
+            <div
+              class="marker marker-glow"
+              data-id="p2"
+              data-group="projects"
+              data-x="85"
+              data-y="102"
+              data-url="/msc.html"
+              data-image=""
+            >
+              <div class="badge">
+                <img src="assets/img/projects/msc2.png" />
+              </div>
+              <div class="label">فولاد مبارکه</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="p2"
-							data-group="projects"
-							data-x="110"
-							data-y="135"
-							data-image="assets/img/projects/golghr.jpg"
-							data-desc="
+            <div
+              class="marker"
+              data-id="p2"
+              data-group="projects"
+              data-x="110"
+              data-y="135"
+              data-image="assets/img/projects/golghr.jpg"
+              data-desc="
 							<p>شرکت گهرروش گل گهر برای یکی از خطوط کلیدی فرآوری خود به الکتروموتوری با توان بسیار بالا و ویژگی‌های خاص فنی نیاز داشت؛ محصولی که تا آن زمان مشابه آن در داخل کشور ساخته نشده بود.
 
 </p><p>
@@ -798,21 +771,21 @@
 
 </ul>
 							"
-						>
-							<div class="badge">
-								<img src="assets/img/pin-gold.png" />
-							</div>
-							<div class="label">شرکت معدنی و صنعتی گل گهر</div>
-						</div>
+            >
+              <div class="badge">
+                <img src="assets/img/pin-gold.png" />
+              </div>
+              <div class="label">شرکت معدنی و صنعتی گل گهر</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="p2"
-							data-group="projects"
-							data-x="93"
-							data-y="140"
-							data-image="assets/img/projects/zobahan-pasargad.jpg"
-							data-desc="
+            <div
+              class="marker"
+              data-id="p2"
+              data-group="projects"
+              data-x="93"
+              data-y="140"
+              data-image="assets/img/projects/zobahan-pasargad.jpg"
+              data-desc="
 							<ul>
 <li>توان: 250kw</li>
 <li>ولتاژ: 6600V</li>
@@ -821,21 +794,21 @@
 
 </ul>
 							"
-						>
-							<div class="badge">
-								<img src="assets/img/pin.png" />
-							</div>
-							<div class="label">ذوب آهن پاسارگاد</div>
-						</div>
+            >
+              <div class="badge">
+                <img src="assets/img/pin.png" />
+              </div>
+              <div class="label">ذوب آهن پاسارگاد</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="p2"
-							data-group="projects"
-							data-x="116"
-							data-y="127"
-							data-image="assets/img/projects/foulad-sirjan.jpg"
-							data-desc="
+            <div
+              class="marker"
+              data-id="p2"
+              data-group="projects"
+              data-x="116"
+              data-y="127"
+              data-image="assets/img/projects/foulad-sirjan.jpg"
+              data-desc="
 							<ul>
 <li>توان: 315kw</li>
 <li>ولتاژ: 6600V</li>
@@ -843,21 +816,21 @@
 <li>فریم سایز: 315</li>
 
 </ul>"
-						>
-							<div class="badge">
-								<img src="assets/img/pin.png" />
-							</div>
-							<div class="label">فولاد سیرجان</div>
-						</div>
+            >
+              <div class="badge">
+                <img src="assets/img/pin.png" />
+              </div>
+              <div class="label">فولاد سیرجان</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="p2"
-							data-group="projects"
-							data-x="107"
-							data-y="123"
-							data-image="assets/img/projects/mes-meydok.jpg"
-							data-desc="
+            <div
+              class="marker"
+              data-id="p2"
+              data-group="projects"
+              data-x="107"
+              data-y="123"
+              data-image="assets/img/projects/mes-meydok.jpg"
+              data-desc="
 							<p>در جریان عملیات تولید در مجتمع مس میدوک، یکی از الکتروموتور های عظیم آسیاب بال‌میل که ساخت شرکت آمریکایی جنرال الکتریک (GE) بود، دچار آسیب جدی شد. در شرایطی که تحریم ها هرگونه خدمات پس از فروش از سوی سازنده خارجی را ناممکن کرده بود، مدیران این مجتمع برای اورهال و بازسازی موتور با جمکو تماس گرفتند.
 					</p>
 <p>تیم مهندسی جمکو در کوتاه‌ترین زمان ممکن با بازطراحی  و ساخت مجدد استاتور، عملیات اورهال را به‌طور کامل انجام داد و الکتروموتور را به خط تولید بازگرداند. عملکرد موفق و سرعت عمل در اجرای این پروژه باعث شد خط تولید مجتمع بدون توقف طولانی‌مدت به کار خود ادامه دهد.</p>
@@ -874,21 +847,21 @@
 
 </ul>
 "
-						>
-							<div class="badge">
-								<img src="assets/img/pin-gold.png" />
-							</div>
-							<div class="label">مجتمع مس میدوک</div>
-						</div>
+            >
+              <div class="badge">
+                <img src="assets/img/pin-gold.png" />
+              </div>
+              <div class="label">مجتمع مس میدوک</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="p2"
-							data-group="projects"
-							data-x="84"
-							data-y="88"
-							data-image="assets/img/projects/foulad-gharb.jpg"
-							data-desc="شرکت فولاد غرب آسیا برای اورهال خط تولید خود با چالشی جدی روبه رو بود. آنها نیازمند الکتروموتورهای جایگزین برای موتورهای برند WEG بودند؛ موتورهایی با سه توان متفاوت (2200 و 2500 و 2900 کیلووات) که در خط نورد سرد این شرکت بکار گرفته شده بود.
+            <div
+              class="marker"
+              data-id="p2"
+              data-group="projects"
+              data-x="84"
+              data-y="88"
+              data-image="assets/img/projects/foulad-gharb.jpg"
+              data-desc="شرکت فولاد غرب آسیا برای اورهال خط تولید خود با چالشی جدی روبه رو بود. آنها نیازمند الکتروموتورهای جایگزین برای موتورهای برند WEG بودند؛ موتورهایی با سه توان متفاوت (2200 و 2500 و 2900 کیلووات) که در خط نورد سرد این شرکت بکار گرفته شده بود.
 
 </p><p>
 
@@ -904,21 +877,21 @@
 
 </ul>
 "
-						>
-							<div class="badge">
-								<img src="assets/img/pin-gold.png" />
-							</div>
-							<div class="label">فولاد غرب آسیا</div>
-						</div>
+            >
+              <div class="badge">
+                <img src="assets/img/pin-gold.png" />
+              </div>
+              <div class="label">فولاد غرب آسیا</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="p2"
-							data-group="projects"
-							data-x="70"
-							data-y="120"
-							data-image="assets/img/projects/foulad-khozestan.jpg"
-							data-desc="
+            <div
+              class="marker"
+              data-id="p2"
+              data-group="projects"
+              data-x="70"
+              data-y="120"
+              data-image="assets/img/projects/foulad-khozestan.jpg"
+              data-desc="
 							
 							<ul>
 <li>توان: 560kw</li>
@@ -928,21 +901,21 @@
 
 </ul>
 "
-						>
-							<div class="badge">
-								<img src="assets/img/pin.png" />
-							</div>
-							<div class="label">فولاد خوزستان</div>
-						</div>
+            >
+              <div class="badge">
+                <img src="assets/img/pin.png" />
+              </div>
+              <div class="label">فولاد خوزستان</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="p2"
-							data-group="projects"
-							data-x="116"
-							data-y="66"
-							data-image="assets/img/projects/foulad-sabzevar.jpg"
-							data-desc="
+            <div
+              class="marker"
+              data-id="p2"
+              data-group="projects"
+              data-x="116"
+              data-y="66"
+              data-image="assets/img/projects/foulad-sabzevar.jpg"
+              data-desc="
 							<ul>
 <li>توان: 2600kw</li>
 <li>ولتاژ: 6600V</li>
@@ -950,21 +923,21 @@
 <li>فریم سایز: 560</li>
 
 </ul>"
-						>
-							<div class="badge">
-								<img src="assets/img/pin.png" />
-							</div>
-							<div class="label">فولاد سبزوار</div>
-						</div>
+            >
+              <div class="badge">
+                <img src="assets/img/pin.png" />
+              </div>
+              <div class="label">فولاد سبزوار</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="p2"
-							data-group="projects"
-							data-x="124"
-							data-y="85"
-							data-image="assets/img/projects/siman-sabzevar.jpg"
-							data-desc="
+            <div
+              class="marker"
+              data-id="p2"
+              data-group="projects"
+              data-x="124"
+              data-y="85"
+              data-image="assets/img/projects/siman-sabzevar.jpg"
+              data-desc="
 							<ul>
 <li>توان: 250kw</li>
 <li>ولتاژ: 6600V</li>
@@ -972,21 +945,21 @@
 <li>فریم سایز: 315</li>
 
 </ul>"
-						>
-							<div class="badge">
-								<img src="assets/img/pin.png" />
-							</div>
-							<div class="label">سیمان سبزوار</div>
-						</div>
+            >
+              <div class="badge">
+                <img src="assets/img/pin.png" />
+              </div>
+              <div class="label">سیمان سبزوار</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="p2"
-							data-group="projects"
-							data-x="126"
-							data-y="70"
-							data-image="assets/img/projects/foulad-neshabour.jpg"
-							data-desc="
+            <div
+              class="marker"
+              data-id="p2"
+              data-group="projects"
+              data-x="126"
+              data-y="70"
+              data-image="assets/img/projects/foulad-neshabour.jpg"
+              data-desc="
 							<ul>
 <li>توان: 1700kw</li>
 <li>ولتاژ: 6600V</li>
@@ -994,21 +967,21 @@
 <li>فریم سایز: 500</li>
 
 </ul>"
-						>
-							<div class="badge">
-								<img src="assets/img/pin.png" />
-							</div>
-							<div class="label">فولاد نشابور</div>
-						</div>
+            >
+              <div class="badge">
+                <img src="assets/img/pin.png" />
+              </div>
+              <div class="label">فولاد نشابور</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="p2"
-							data-group="projects"
-							data-x="99"
-							data-y="75"
-							data-image="assets/img/projects/siman-faraz.jpg"
-							data-desc="
+            <div
+              class="marker"
+              data-id="p2"
+              data-group="projects"
+              data-x="99"
+              data-y="75"
+              data-image="assets/img/projects/siman-faraz.jpg"
+              data-desc="
 
 							<p>در پاسخ به نیاز شرکت سیمان فراز فیروزکوه، شرکت دانش بنیان جمکو اقدام به طراحی و ساخت یک الکتروموتور فشارمتوسط با توان  3750 کیلووات، ولتاژ 6300 ولت و ۶ قطب کرده است. این الکتروموتور که در مدت زمان ۱۲۰ روز توسط متخصصین جمکو طراحی و تولید شد، جایگزین الکتروموتورهای وارداتی Elin از کشور اتریش در بخش آسیاب شرکت سیمان فراز فیروزکوه شده است.
 
@@ -1025,21 +998,21 @@
 <li>فریم سایز: 1000</li>
 
 </ul>"
-						>
-							<div class="badge">
-								<img src="assets/img/pin.png" />
-							</div>
-							<div class="label">سیمان فراز فیروزکوه</div>
-						</div>
+            >
+              <div class="badge">
+                <img src="assets/img/pin.png" />
+              </div>
+              <div class="label">سیمان فراز فیروزکوه</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="p2"
-							data-group="projects"
-							data-x="140"
-							data-y="95"
-							data-image="assets/img/projects/ghori-cement.jpg"
-							data-desc="
+            <div
+              class="marker"
+              data-id="p2"
+              data-group="projects"
+              data-x="140"
+              data-y="95"
+              data-image="assets/img/projects/ghori-cement.jpg"
+              data-desc="
 						<p>	
 دو دستگاه الکتروموتور 360 کیلووات با روتور سیم پیچی به سفارش شرکت سیمان غوری افغانستان توسط جمکو طراحی و تولید شده است. این پروژه به دلیل توان بالا و سایز خاص الکتروموتورها، در زمره پروژه‌های مهم صادراتی شرکت قرار می‌گیرد.</p>
 							<ul>
@@ -1049,21 +1022,21 @@
 <li>فریم سایز: 680</li>
 
 </ul>"
-						>
-							<div class="badge">
-								<img src="assets/img/pin.png" />
-							</div>
-							<div class="label">سیمان غوری افغانستان</div>
-						</div>
+            >
+              <div class="badge">
+                <img src="assets/img/pin.png" />
+              </div>
+              <div class="label">سیمان غوری افغانستان</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="p2"
-							data-group="projects"
-							data-x="126"
-							data-y="55"
-							data-image="assets/img/projects/siman-turkamanestan.jpg"
-							data-desc="
+            <div
+              class="marker"
+              data-id="p2"
+              data-group="projects"
+              data-x="126"
+              data-y="55"
+              data-image="assets/img/projects/siman-turkamanestan.jpg"
+              data-desc="
 							<ul>
 <li>توان: 2750kw</li>
 <li>ولتاژ: 6600V</li>
@@ -1071,18 +1044,18 @@
 <li>فریم سایز: 630</li>
 
 </ul>"
-						>
-							<div class="badge">
-								<img src="assets/img/pin.png" />
-							</div>
-							<div class="label">سیمان ترکمنستان</div>
-						</div>
-						<!--Start Sales-->
+            >
+              <div class="badge">
+                <img src="assets/img/pin.png" />
+              </div>
+              <div class="label">سیمان ترکمنستان</div>
+            </div>
+            <!--Start Sales-->
 
-						<div
-							class="marker"
-							data-id="s1"
-							data-desc="
+            <div
+              class="marker"
+              data-id="s1"
+              data-desc="
 							<div class='sales-popup-item'>
 							<h4>کالا صنعتی</h4>
 <b>شماره تلفن:</b>
@@ -1129,21 +1102,21 @@ www.kalasanati.com<br/>
 مشهد-بلواروکیل آباد - نبش وکیل آباد34- پلاک842-كدپستی: 9178875669
 							</div>
 "
-							data-image="assets/img/sales/mashhad.jpg"
-							data-group="sales"
-							data-x="132"
-							data-y="76"
-						>
-							<div class="badge">
-								<img src="assets/img/jemco-pin.png" />
-							</div>
-							<div class="label">نمایندگان مشهد</div>
-						</div>
+              data-image="assets/img/sales/mashhad.jpg"
+              data-group="sales"
+              data-x="132"
+              data-y="76"
+            >
+              <div class="badge">
+                <img src="assets/img/jemco-pin.png" />
+              </div>
+              <div class="label">نمایندگان مشهد</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="s2"
-							data-desc="
+            <div
+              class="marker"
+              data-id="s2"
+              data-desc="
 							
 							<div class='sales-popup-item'>
 <h4>شرکت عمران آب بابکان</h4>
@@ -1154,21 +1127,21 @@ www.kalasanati.com<br/>
 							</div>
 							
 "
-							data-image="assets/img/sales/kerman.jpg"
-							data-group="sales"
-							data-x="115"
-							data-y="116"
-						>
-							<div class="badge">
-								<img src="assets/img/jemco-pin.png" />
-							</div>
-							<div class="label">نمایندگان کرمان</div>
-						</div>
+              data-image="assets/img/sales/kerman.jpg"
+              data-group="sales"
+              data-x="115"
+              data-y="116"
+            >
+              <div class="badge">
+                <img src="assets/img/jemco-pin.png" />
+              </div>
+              <div class="label">نمایندگان کرمان</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="s3"
-							data-desc="
+            <div
+              class="marker"
+              data-id="s3"
+              data-desc="
 							
 							<div class='sales-popup-item'>
 <h4>درنیکا زاگرس صنعت صفاهان</h4>
@@ -1187,21 +1160,21 @@ www.kalasanati.com<br/>
 							</div>
 							
 "
-							data-image="assets/img/sales/isfahan.jpg"
-							data-group="sales"
-							data-x="92"
-							data-y="100"
-						>
-							<div class="badge">
-								<img src="assets/img/jemco-pin.png" />
-							</div>
-							<div class="label">نمایندگان اصفهان</div>
-						</div>
+              data-image="assets/img/sales/isfahan.jpg"
+              data-group="sales"
+              data-x="92"
+              data-y="100"
+            >
+              <div class="badge">
+                <img src="assets/img/jemco-pin.png" />
+              </div>
+              <div class="label">نمایندگان اصفهان</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="s4"
-							data-desc="
+            <div
+              class="marker"
+              data-id="s4"
+              data-desc="
 							
 							<div class='sales-popup-item'>
 <h4>شرکت دژآب خوزستان</h4>
@@ -1215,21 +1188,21 @@ www.kalasanati.com<br/>
 							
 							
 "
-							data-image="assets/img/sales/khozestan.jpg"
-							data-group="sales"
-							data-x="74"
-							data-y="110"
-						>
-							<div class="badge">
-								<img src="assets/img/jemco-pin.png" />
-							</div>
-							<div class="label">نمایندگان خوزستان</div>
-						</div>
+              data-image="assets/img/sales/khozestan.jpg"
+              data-group="sales"
+              data-x="74"
+              data-y="110"
+            >
+              <div class="badge">
+                <img src="assets/img/jemco-pin.png" />
+              </div>
+              <div class="label">نمایندگان خوزستان</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="s5"
-							data-desc="
+            <div
+              class="marker"
+              data-id="s5"
+              data-desc="
 							
 							<div class='sales-popup-item'>
 <h4>شرکت تلمبه موتور غرب
@@ -1244,21 +1217,21 @@ www.kalasanati.com<br/>
 							
 							
 "
-							data-image="assets/img/sales/hamedan.jpg"
-							data-group="sales"
-							data-x="70"
-							data-y="88"
-						>
-							<div class="badge">
-								<img src="assets/img/jemco-pin.png" />
-							</div>
-							<div class="label">نمایندگان همدان</div>
-						</div>
+              data-image="assets/img/sales/hamedan.jpg"
+              data-group="sales"
+              data-x="70"
+              data-y="88"
+            >
+              <div class="badge">
+                <img src="assets/img/jemco-pin.png" />
+              </div>
+              <div class="label">نمایندگان همدان</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="s5"
-							data-desc="
+            <div
+              class="marker"
+              data-id="s5"
+              data-desc="
 							
 							<div class='sales-popup-item'>
 <h4>شرکت اندیشه نوین آب آوان
@@ -1273,21 +1246,21 @@ www.kalasanati.com<br/>
 							
 							
 "
-							data-image="assets/img/sales/qazvin.jpg"
-							data-group="sales"
-							data-x="76"
-							data-y="75"
-						>
-							<div class="badge">
-								<img src="assets/img/jemco-pin.png" />
-							</div>
-							<div class="label">نمایندگان قزوین</div>
-						</div>
+              data-image="assets/img/sales/qazvin.jpg"
+              data-group="sales"
+              data-x="76"
+              data-y="75"
+            >
+              <div class="badge">
+                <img src="assets/img/jemco-pin.png" />
+              </div>
+              <div class="label">نمایندگان قزوین</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="s5"
-							data-desc="
+            <div
+              class="marker"
+              data-id="s5"
+              data-desc="
 							
 	<div class='sales-popup-item'>
 <h4>فروشگاه سونتو
@@ -1315,21 +1288,21 @@ www.kalasanati.com<br/>
 							
 							
 "
-							data-image="assets/img/sales/zanjan.jpg"
-							data-group="sales"
-							data-x="68"
-							data-y="70"
-						>
-							<div class="badge">
-								<img src="assets/img/jemco-pin.png" />
-							</div>
-							<div class="label">نمایندگان زنجان</div>
-						</div>
+              data-image="assets/img/sales/zanjan.jpg"
+              data-group="sales"
+              data-x="68"
+              data-y="70"
+            >
+              <div class="badge">
+                <img src="assets/img/jemco-pin.png" />
+              </div>
+              <div class="label">نمایندگان زنجان</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="s5"
-							data-desc="
+            <div
+              class="marker"
+              data-id="s5"
+              data-desc="
 							
 	
 
@@ -1347,21 +1320,21 @@ www.kalasanati.com<br/>
 							
 							
 "
-							data-image="assets/img/sales/kurdistan.jpg"
-							data-group="sales"
-							data-x="62"
-							data-y="78"
-						>
-							<div class="badge">
-								<img src="assets/img/jemco-pin.png" />
-							</div>
-							<div class="label">نمایندگان کردستان</div>
-						</div>
+              data-image="assets/img/sales/kurdistan.jpg"
+              data-group="sales"
+              data-x="62"
+              data-y="78"
+            >
+              <div class="badge">
+                <img src="assets/img/jemco-pin.png" />
+              </div>
+              <div class="label">نمایندگان کردستان</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="s5"
-							data-desc="
+            <div
+              class="marker"
+              data-id="s5"
+              data-desc="
 							
 	
 
@@ -1377,21 +1350,21 @@ www.kalasanati.com<br/>
 <br/>
 </div>												
 "
-							data-image="assets/img/sales/tabriz.jpg"
-							data-group="sales"
-							data-x="62"
-							data-y="58"
-						>
-							<div class="badge">
-								<img src="assets/img/jemco-pin.png" />
-							</div>
-							<div class="label">نمایندگان آذربایجان‌شرقی</div>
-						</div>
+              data-image="assets/img/sales/tabriz.jpg"
+              data-group="sales"
+              data-x="62"
+              data-y="58"
+            >
+              <div class="badge">
+                <img src="assets/img/jemco-pin.png" />
+              </div>
+              <div class="label">نمایندگان آذربایجان‌شرقی</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="s5"
-							data-desc="
+            <div
+              class="marker"
+              data-id="s5"
+              data-desc="
 							
 	
 
@@ -1485,25 +1458,25 @@ www.kalasanati.com<br/>
 <br/>
 </div>	
 "
-							data-image="assets/img/sales/tehran.jpg"
-							data-group="sales"
-							data-x="84"
-							data-y="76"
-						>
-							<div class="badge">
-								<img src="assets/img/jemco-pin.png" />
-							</div>
-							<div class="label">نمایندگان تهران</div>
-						</div>
-						<!--End Sales-->
+              data-image="assets/img/sales/tehran.jpg"
+              data-group="sales"
+              data-x="84"
+              data-y="76"
+            >
+              <div class="badge">
+                <img src="assets/img/jemco-pin.png" />
+              </div>
+              <div class="label">نمایندگان تهران</div>
+            </div>
+            <!--End Sales-->
 
-						<div
-							class="marker"
-							data-id="office"
-							data-type="office"
-							data-group="fixed"
-							data-image="assets/img/jemco1.jpg"
-							data-desc="
+            <div
+              class="marker"
+              data-id="office"
+              data-type="office"
+              data-group="fixed"
+              data-image="assets/img/jemco1.jpg"
+              data-desc="
 							<p>جمکو، با سابقه‌ای درخشان در طراحی و تولید الکتروموتور، به‌عنوان مجموعه‌ای پیشتاز در صنعت کشور فعالیت می‌کند. تکیه بر دانش تخصصی، زیرساخت‌های فوق پیشرفته و رعایت استانداردهای بین‌المللی، جمکو را به قدرتی عظیم در بازارهای صنعتی داخلی و منطقه‌ای تبدیل کرده است.</p>
 							<p>شرکت ماشین‌های الکتریکی جوین (جمکو) در سال ۱۳۶۹ با هدف کاهش وابستگی صنایع داخلی به منابع خارجی، در شهرستان سبزوار تأسیس شد. این شرکت با بهره‌گیری از نیروهای متخصص و تجهیزات پیشرفته، طراحی، ساخت، تست و تعمیر انواع الکتروموتورها و ژنراتورها را به‌صورت کامل بر عهده دارند.</p>
 
@@ -1514,24 +1487,24 @@ www.kalasanati.com<br/>
 
 <style>.h_iframe-aparat_embed_frame{position:relative;}.h_iframe-aparat_embed_frame .ratio{display:block;width:100%;height:auto;}.h_iframe-aparat_embed_frame iframe{position:absolute;top:0;left:0;width:100%;height:100%;}</style><div class='h_iframe-aparat_embed_frame'><span style='display: block;padding-top: 57%'></span><iframe src='https://www.aparat.com/video/video/embed/videohash/kyrbocp/vt/frame'  allowFullScreen='true' webkitallowfullscreen='true' mozallowfullscreen='true'></iframe></div>
 							"
-							data-x="90"
-							data-y="81"
-						>
-							<div class="badge">
-								<img src="assets/img/office.png" />
-							</div>
-							<div class="label">دفتر مرکزی جمکو</div>
-						</div>
+              data-x="90"
+              data-y="81"
+            >
+              <div class="badge">
+                <img src="assets/img/office.png" />
+              </div>
+              <div class="label">دفتر مرکزی جمکو</div>
+            </div>
 
-						<div
-							class="marker"
-							data-id="factory"
-							data-type="factory"
-							data-group="fixed"
-							data-image="assets/img/jemco-factory.jpg"
-							data-x="118"
-							data-y="77"
-							data-desc="<p>
+            <div
+              class="marker"
+              data-id="factory"
+              data-type="factory"
+              data-group="fixed"
+              data-image="assets/img/jemco-factory.jpg"
+              data-x="118"
+              data-y="77"
+              data-desc="<p>
 
 								الکتروموتورها و ژنراتورهای جمکو مطابق با استانداردهای بین المللی و سازمان ملی استاندارد ایران هستند.
 همچنین، جمکو در راستای بهبود فرهنگ مشتری مداری جدیدترین طر ح ها و مواد را به کار می‌برد تا بهترین عملکرد
@@ -1550,304 +1523,282 @@ www.kalasanati.com<br/>
 صنعت الکتروموتور تبدیل شود. همچنین شرکت جمکو در راستای بهبود فرهنگ مشتری مداری اقدام به ارائه خدمات
 پس از فروش به صورت 24 ساعته کرده است
 							</p>"
-						>
-							<div class="badge">
-								<img src="assets/img/factory.png" />
-							</div>
-							<div class="label">کارخانه جمکو</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+            >
+              <div class="badge">
+                <img src="assets/img/factory.png" />
+              </div>
+              <div class="label">کارخانه جمکو</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-		<div class="hint">
-			این موارد تنها برخی از پروژه‌های مورد اهمیت جمکو هستند.
-			<br />برای مشاهده نمایندگان، از بخش بالای صفحه تیک نمایندگان را فعال
-			کنید.
-		</div>
+    <div class="hint">
+      این موارد تنها برخی از پروژه‌های مورد اهمیت جمکو هستند.
+      <br />برای مشاهده نمایندگان، از بخش بالای صفحه تیک نمایندگان را فعال کنید.
+    </div>
 
-		<div class="copyright">Powered By Mirka.agency💎</div>
+    <div class="copyright">Powered By Mirka.agency💎</div>
 
-		<!-- popup root placed outside of the map viewport so its scrolling isn't
+    <!-- popup root placed outside of the map viewport so its scrolling isn't
 		     intercepted by map pan/zoom handlers -->
-		<div id="popupRoot"></div>
+    <div id="popupRoot"></div>
 
-		<script>
-			const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    <script>
+      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-			const mapInner = document.getElementById("mapInner");
-			const mapImage = document.getElementById("mapImage");
-			const viewport = document.getElementById("viewport");
-			let state = {
-				scale: 1,
-				minScale: 0.5,
-				maxScale: 1.5,
-				translateX: 0,
-				translateY: 0,
-				dragging: false,
-				lastMouse: { x: 0, y: 0 },
-			};
-			function updateTransform() {
-				mapInner.style.transform = `translate(-50%,-50%) translate(${state.translateX}px, ${state.translateY}px) scale(${state.scale})`;
-			}
+      const mapInner = document.getElementById("mapInner");
+      const mapImage = document.getElementById("mapImage");
+      const viewport = document.getElementById("viewport");
+      let state = {
+        scale: 1,
+        minScale: 0.5,
+        maxScale: 1.5,
+        translateX: 0,
+        translateY: 0,
+        dragging: false,
+        lastMouse: { x: 0, y: 0 },
+      };
+      function updateTransform() {
+        mapInner.style.transform = `translate(-50%,-50%) translate(${state.translateX}px, ${state.translateY}px) scale(${state.scale})`;
+      }
 
-			function positionMarkers() {
-				const markers = mapInner.querySelectorAll(".marker");
-				const rect = mapImage.getBoundingClientRect();
-				const width = rect.width;
-				const height = rect.height;
-				markers.forEach((m) => {
-					const dx = parseFloat(m.dataset.x) || 0;
-					const dy = parseFloat(m.dataset.y) || 0;
-					const left = (dx / 100) * width;
-					const top = (dy / 100) * height;
-					m.style.left = left + "px";
-					m.style.top = top + "px";
-				});
-			}
-			function onImageReady() {
-				const rect = mapImage.getBoundingClientRect();
-				mapInner.style.width = rect.width + "px";
-				mapInner.style.height = rect.height + "px";
-				positionMarkers();
+      function positionMarkers() {
+        const markers = mapInner.querySelectorAll(".marker");
+        const rect = mapImage.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+        markers.forEach((m) => {
+          const dx = parseFloat(m.dataset.x) || 0;
+          const dy = parseFloat(m.dataset.y) || 0;
+          const left = (dx / 100) * width;
+          const top = (dy / 100) * height;
+          m.style.left = left + "px";
+          m.style.top = top + "px";
+        });
+      }
+      function onImageReady() {
+        const rect = mapImage.getBoundingClientRect();
+        mapInner.style.width = rect.width + "px";
+        mapInner.style.height = rect.height + "px";
+        positionMarkers();
 
-				const initialScale = 0.4; // 1 = default display size; >1 zooms in, <1 zooms out
-				state.scale = clamp(
-					initialScale,
-					state.minScale,
-					state.maxScale
-				);
-				state.translateX = 0; // optional: center on map
-				state.translateY = 0;
-				updateTransform();
-			}
-			window.addEventListener("resize", onImageReady);
-			if (mapImage.complete) onImageReady();
-			else mapImage.addEventListener("load", onImageReady);
+        const initialScale = 0.4; // 1 = default display size; >1 zooms in, <1 zooms out
+        state.scale = clamp(initialScale, state.minScale, state.maxScale);
+        state.translateX = 0; // optional: center on map
+        state.translateY = 0;
+        updateTransform();
+      }
+      window.addEventListener("resize", onImageReady);
+      if (mapImage.complete) onImageReady();
+      else mapImage.addEventListener("load", onImageReady);
 
-			viewport.addEventListener("mousedown", (e) => {
-				if (e.button !== 0) return;
-				state.dragging = true;
-				state.lastMouse = { x: e.clientX, y: e.clientY };
-				viewport.style.cursor = "grabbing";
-			});
-			window.addEventListener("mouseup", () => {
-				state.dragging = false;
-				viewport.style.cursor = "";
-			});
-			window.addEventListener("mousemove", (e) => {
-				if (!state.dragging) return;
-				const dx = e.clientX - state.lastMouse.x;
-				const dy = e.clientY - state.lastMouse.y;
-				state.lastMouse = { x: e.clientX, y: e.clientY };
-				state.translateX += dx;
-				state.translateY += dy;
-				limitPan();
-				updateTransform();
-			});
+      viewport.addEventListener("mousedown", (e) => {
+        if (e.button !== 0) return;
+        state.dragging = true;
+        state.lastMouse = { x: e.clientX, y: e.clientY };
+        viewport.style.cursor = "grabbing";
+      });
+      window.addEventListener("mouseup", () => {
+        state.dragging = false;
+        viewport.style.cursor = "";
+      });
+      window.addEventListener("mousemove", (e) => {
+        if (!state.dragging) return;
+        const dx = e.clientX - state.lastMouse.x;
+        const dy = e.clientY - state.lastMouse.y;
+        state.lastMouse = { x: e.clientX, y: e.clientY };
+        state.translateX += dx;
+        state.translateY += dy;
+        limitPan();
+        updateTransform();
+      });
 
-			viewport.addEventListener(
-				"wheel",
-				(e) => {
-					e.preventDefault();
-					const delta = -e.deltaY * 0.0015;
-					zoomAt(e.clientX, e.clientY, 1 + delta);
-				},
-				{ passive: false }
-			);
-			function zoomAt(clientX, clientY, zoomFactor) {
-				const oldScale = state.scale;
-				const newScale = clamp(
-					oldScale * zoomFactor,
-					state.minScale,
-					state.maxScale
-				);
+      viewport.addEventListener(
+        "wheel",
+        (e) => {
+          e.preventDefault();
+          const delta = -e.deltaY * 0.0015;
+          zoomAt(e.clientX, e.clientY, 1 + delta);
+        },
+        { passive: false }
+      );
+      function zoomAt(clientX, clientY, zoomFactor) {
+        const oldScale = state.scale;
+        const newScale = clamp(
+          oldScale * zoomFactor,
+          state.minScale,
+          state.maxScale
+        );
 
-				if (newScale === oldScale) return;
+        if (newScale === oldScale) return;
 
-				// Map element rect (screen coords)
-				const mapRect = mapInner.getBoundingClientRect();
+        // Map element rect (screen coords)
+        const mapRect = mapInner.getBoundingClientRect();
 
-				// offset of pointer inside map (screen px)
-				const offsetX = clientX - mapRect.left;
-				const offsetY = clientY - mapRect.top;
+        // offset of pointer inside map (screen px)
+        const offsetX = clientX - mapRect.left;
+        const offsetY = clientY - mapRect.top;
 
-				// compute local (unscaled) coordinate of pointer relative to map image origin
-				const localX = (offsetX - state.translateX) / oldScale;
-				const localY = (offsetY - state.translateY) / oldScale;
+        // compute local (unscaled) coordinate of pointer relative to map image origin
+        const localX = (offsetX - state.translateX) / oldScale;
+        const localY = (offsetY - state.translateY) / oldScale;
 
-				// compute new translate so newScale * local + newTranslate = offset
-				state.translateX = offsetX - newScale * localX;
-				state.translateY = offsetY - newScale * localY;
+        // compute new translate so newScale * local + newTranslate = offset
+        state.translateX = offsetX - newScale * localX;
+        state.translateY = offsetY - newScale * localY;
 
-				state.scale = newScale;
-				limitPan();
-				updateTransform();
-			}
-			function limitPan() {
-				const mapRect = mapInner.getBoundingClientRect();
-				const vpRect = viewport.getBoundingClientRect();
-				const scaledW = mapRect.width;
-				const scaledH = mapRect.height;
-				state.translateX = clamp(
-					state.translateX,
-					-scaledW * 2,
-					scaledW * 2
-				);
-				state.translateY = clamp(
-					state.translateY,
-					-scaledH * 2,
-					scaledH * 2
-				);
-			}
+        state.scale = newScale;
+        limitPan();
+        updateTransform();
+      }
+      function limitPan() {
+        const mapRect = mapInner.getBoundingClientRect();
+        const vpRect = viewport.getBoundingClientRect();
+        const scaledW = mapRect.width;
+        const scaledH = mapRect.height;
+        state.translateX = clamp(state.translateX, -scaledW * 2, scaledW * 2);
+        state.translateY = clamp(state.translateY, -scaledH * 2, scaledH * 2);
+      }
 
-			document.getElementById("zoom-in").addEventListener("click", () => {
-				const vp = viewport.getBoundingClientRect();
-				zoomAt(vp.left + vp.width / 2, vp.top + vp.height / 2, 1.18);
-			});
-			document
-				.getElementById("zoom-out")
-				.addEventListener("click", () => {
-					const vp = viewport.getBoundingClientRect();
-					zoomAt(
-						vp.left + vp.width / 2,
-						vp.top + vp.height / 2,
-						0.86
-					);
-				});
+      document.getElementById("zoom-in").addEventListener("click", () => {
+        const vp = viewport.getBoundingClientRect();
+        zoomAt(vp.left + vp.width / 2, vp.top + vp.height / 2, 1.18);
+      });
+      document.getElementById("zoom-out").addEventListener("click", () => {
+        const vp = viewport.getBoundingClientRect();
+        zoomAt(vp.left + vp.width / 2, vp.top + vp.height / 2, 0.86);
+      });
 
-			// touch
-			let lastTouchDist = null;
-			let lastTouchCenter = null;
-			viewport.addEventListener(
-				"touchstart",
-				(e) => {
-					if (e.touches.length === 1) {
-						state.dragging = true;
-						state.lastMouse = {
-							x: e.touches[0].clientX,
-							y: e.touches[0].clientY,
-						};
-					} else if (e.touches.length === 2) {
-						state.dragging = false;
-						lastTouchDist = distance(e.touches[0], e.touches[1]);
-						lastTouchCenter = centerPoint(
-							e.touches[0],
-							e.touches[1]
-						);
-					}
-				},
-				{ passive: true }
-			);
-			viewport.addEventListener(
-				"touchmove",
-				(e) => {
-					if (e.touches.length === 1 && state.dragging) {
-						const t = e.touches[0];
-						const dx = t.clientX - state.lastMouse.x;
-						const dy = t.clientY - state.lastMouse.y;
-						state.lastMouse = { x: t.clientX, y: t.clientY };
-						state.translateX += dx;
-						state.translateY += dy;
-						limitPan();
-						updateTransform();
-					} else if (e.touches.length === 2) {
-						const d = distance(e.touches[0], e.touches[1]);
-						const c = centerPoint(e.touches[0], e.touches[1]);
-						if (lastTouchDist) {
-							const factor = d / lastTouchDist;
-							zoomAt(c.clientX, c.clientY, factor);
-						}
-						lastTouchDist = d;
-						lastTouchCenter = c;
-					}
-				},
-				{ passive: false }
-			);
-			viewport.addEventListener(
-				"touchend",
-				(e) => {
-					if (e.touches.length === 0) {
-						state.dragging = false;
-						lastTouchDist = null;
-						lastTouchCenter = null;
-					}
-				},
-				{ passive: true }
-			);
-			function distance(a, b) {
-				return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-			}
-			function centerPoint(a, b) {
-				return {
-					clientX: (a.clientX + b.clientX) / 2,
-					clientY: (a.clientY + b.clientY) / 2,
-				};
-			}
+      // touch
+      let lastTouchDist = null;
+      let lastTouchCenter = null;
+      viewport.addEventListener(
+        "touchstart",
+        (e) => {
+          if (e.touches.length === 1) {
+            state.dragging = true;
+            state.lastMouse = {
+              x: e.touches[0].clientX,
+              y: e.touches[0].clientY,
+            };
+          } else if (e.touches.length === 2) {
+            state.dragging = false;
+            lastTouchDist = distance(e.touches[0], e.touches[1]);
+            lastTouchCenter = centerPoint(e.touches[0], e.touches[1]);
+          }
+        },
+        { passive: true }
+      );
+      viewport.addEventListener(
+        "touchmove",
+        (e) => {
+          if (e.touches.length === 1 && state.dragging) {
+            const t = e.touches[0];
+            const dx = t.clientX - state.lastMouse.x;
+            const dy = t.clientY - state.lastMouse.y;
+            state.lastMouse = { x: t.clientX, y: t.clientY };
+            state.translateX += dx;
+            state.translateY += dy;
+            limitPan();
+            updateTransform();
+          } else if (e.touches.length === 2) {
+            const d = distance(e.touches[0], e.touches[1]);
+            const c = centerPoint(e.touches[0], e.touches[1]);
+            if (lastTouchDist) {
+              const factor = d / lastTouchDist;
+              zoomAt(c.clientX, c.clientY, factor);
+            }
+            lastTouchDist = d;
+            lastTouchCenter = c;
+          }
+        },
+        { passive: false }
+      );
+      viewport.addEventListener(
+        "touchend",
+        (e) => {
+          if (e.touches.length === 0) {
+            state.dragging = false;
+            lastTouchDist = null;
+            lastTouchCenter = null;
+          }
+        },
+        { passive: true }
+      );
+      function distance(a, b) {
+        return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+      }
+      function centerPoint(a, b) {
+        return {
+          clientX: (a.clientX + b.clientX) / 2,
+          clientY: (a.clientY + b.clientY) / 2,
+        };
+      }
 
-			// popup + sounds
-			const popupRoot = document.getElementById("popupRoot");
-			const clickAudio = document.getElementById("clickAudio");
-			const bgAudio = document.getElementById("bgAudio");
-			const audioToggle = document.getElementById("audioToggle");
-			let bgPlaying = false;
+      // popup + sounds
+      const popupRoot = document.getElementById("popupRoot");
+      const clickAudio = document.getElementById("clickAudio");
+      const bgAudio = document.getElementById("bgAudio");
+      const audioToggle = document.getElementById("audioToggle");
+      let bgPlaying = false;
+      audioToggle.textContent = "⏸";
+      bgAudio.play();
+      // toggle background audio (user interaction required in many browsers)
+      audioToggle.addEventListener("click", () => {
+        if (!bgPlaying) {
+          // try to play
+          bgAudio
+            .play()
+            .then(() => {
+              bgPlaying = true;
+              audioToggle.textContent = "⏸";
+            })
+            .catch(() => {
+              audioToggle.textContent = "▶";
+              alert(
+                "Browser blocked autoplay. Interact with the page (click) and try again."
+              );
+            });
+        } else {
+          bgAudio.pause();
+          bgPlaying = false;
+          audioToggle.textContent = "▶";
+        }
+      });
 
-			// toggle background audio (user interaction required in many browsers)
-			audioToggle.addEventListener("click", () => {
-				if (!bgPlaying) {
-					// try to play
-					bgAudio
-						.play()
-						.then(() => {
-							bgPlaying = true;
-							audioToggle.textContent = "⏸";
-						})
-						.catch(() => {
-							audioToggle.textContent = "▶";
-							alert(
-								"Browser blocked autoplay. Interact with the page (click) and try again."
-							);
-						});
-				} else {
-					bgAudio.pause();
-					bgPlaying = false;
-					audioToggle.textContent = "▶";
-				}
-			});
+      mapInner.addEventListener("click", (e) => {
+        const marker = e.target.closest(".marker");
+        if (!marker) return;
+        e.stopPropagation();
+        openPopupFor(marker);
+      });
+      window.addEventListener("click", () => {
+        /* clicking outside closes popup */ if (
+          !popupRoot.querySelector(".popup-full-backdrop")
+        )
+          return;
+        closePopup();
+      });
 
-			mapInner.addEventListener("click", (e) => {
-				const marker = e.target.closest(".marker");
-				if (!marker) return;
-				e.stopPropagation();
-				openPopupFor(marker);
-			});
-			window.addEventListener("click", () => {
-				/* clicking outside closes popup */ if (
-					!popupRoot.querySelector(".popup-full-backdrop")
-				)
-					return;
-				closePopup();
-			});
+      function openPopupFor(marker) {
+        closePopup();
+        // play click/open sound if available
+        try {
+          clickAudio.currentTime = 0;
+          clickAudio.play().catch(() => {});
+        } catch (e) {}
 
-			function openPopupFor(marker) {
-				closePopup();
-				// play click/open sound if available
-				try {
-					clickAudio.currentTime = 0;
-					clickAudio.play().catch(() => {});
-				} catch (e) {}
+        const id = marker.dataset.id || "unknown";
+        const title = (marker.querySelector(".label") || {}).textContent || id;
+        const imageSrc = marker.dataset.image || "";
+        const desc = marker.dataset.desc || "بدون توضیحات";
 
-				const id = marker.dataset.id || "unknown";
-				const title =
-					(marker.querySelector(".label") || {}).textContent || id;
-				const imageSrc = marker.dataset.image || "";
-				const desc = marker.dataset.desc || "بدون توضیحات";
-
-				const markerUrl = (marker.dataset.url || "").trim();
-				let html = "";
-				if (markerUrl) {
-					html = `
+        const markerUrl = (marker.dataset.url || "").trim();
+        let html = "";
+        if (markerUrl) {
+          html = `
 					<div class="popup-full-backdrop popup-animate" data-marker="${id}">
 					  <div class="popup-full popup-iframe">
 					    <div class="close" id="popupClose">✕</div>
@@ -1855,16 +1806,16 @@ www.kalasanati.com<br/>
 					  </div>
 					</div>
 					`;
-				} else {
-					html = `
+        } else {
+          html = `
 				        <div class="popup-full-backdrop popup-animate" data-marker="${id}">
 				          <div class="popup-full">
 				            <div class="popup-left">
 				              ${
-									imageSrc
-										? `<img src="${imageSrc}" alt="${title}">`
-										: `<div style="color:var(--muted);text-align:center;padding:22px;">بدون تصویر</div>`
-								}
+                        imageSrc
+                          ? `<img src="${imageSrc}" alt="${title}">`
+                          : `<div style="color:var(--muted);text-align:center;padding:22px;">بدون تصویر</div>`
+                      }
 				            </div>
 				            <div class="popup-right">
 				              <div class="close" id="popupClose">✕</div>
@@ -1874,180 +1825,169 @@ www.kalasanati.com<br/>
 				          </div>
 				        </div>
 				      `;
-				}
+        }
 
-				popupRoot.innerHTML = html;
-				const backdrop = popupRoot.querySelector(
-					".popup-full-backdrop"
-				);
-				const popupFullEl = popupRoot.querySelector(".popup-full");
-				if (popupFullEl) {
-					popupFullEl.addEventListener(
-						"wheel",
-						(ev) => ev.stopPropagation(),
-						{ passive: false }
-					);
-					popupFullEl.addEventListener(
-						"touchstart",
-						(ev) => ev.stopPropagation(),
-						{ passive: true }
-					);
-					popupFullEl.addEventListener(
-						"touchmove",
-						(ev) => ev.stopPropagation(),
-						{ passive: false }
-					);
-				}
-				// prevent event trickle closing when clicking inside
-				backdrop.addEventListener("click", (ev) => {
-					if (ev.target === backdrop) closePopup();
-				});
-				const closeBtn = popupRoot.querySelector("#popupClose");
-				if (closeBtn)
-					closeBtn.addEventListener("click", (ev) => {
-						ev.stopPropagation();
-						closePopup();
-					});
+        popupRoot.innerHTML = html;
+        const backdrop = popupRoot.querySelector(".popup-full-backdrop");
+        const popupFullEl = popupRoot.querySelector(".popup-full");
+        if (popupFullEl) {
+          popupFullEl.addEventListener("wheel", (ev) => ev.stopPropagation(), {
+            passive: false,
+          });
+          popupFullEl.addEventListener(
+            "touchstart",
+            (ev) => ev.stopPropagation(),
+            { passive: true }
+          );
+          popupFullEl.addEventListener(
+            "touchmove",
+            (ev) => ev.stopPropagation(),
+            { passive: false }
+          );
+        }
+        // prevent event trickle closing when clicking inside
+        backdrop.addEventListener("click", (ev) => {
+          if (ev.target === backdrop) closePopup();
+        });
+        const closeBtn = popupRoot.querySelector("#popupClose");
+        if (closeBtn)
+          closeBtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            closePopup();
+          });
 
-				// Prevent map pan/zoom while interacting with popup scroll area
-				const popupRight = popupRoot.querySelector(".popup-right");
-				if (popupRight) {
-					// stop wheel events from reaching the viewport/map
-					popupRight.addEventListener(
-						"wheel",
-						(ev) => {
-							ev.stopPropagation();
-						},
-						{ passive: false }
-					);
+        // Prevent map pan/zoom while interacting with popup scroll area
+        const popupRight = popupRoot.querySelector(".popup-right");
+        if (popupRight) {
+          // stop wheel events from reaching the viewport/map
+          popupRight.addEventListener(
+            "wheel",
+            (ev) => {
+              ev.stopPropagation();
+            },
+            { passive: false }
+          );
 
-					// for touch devices, stop touchmove propagation when touching the popup
-					popupRight.addEventListener(
-						"touchstart",
-						(ev) => {
-							ev.stopPropagation();
-						},
-						{ passive: true }
-					);
-					popupRight.addEventListener(
-						"touchmove",
-						(ev) => {
-							ev.stopPropagation();
-						},
-						{ passive: false }
-					);
-				}
+          // for touch devices, stop touchmove propagation when touching the popup
+          popupRight.addEventListener(
+            "touchstart",
+            (ev) => {
+              ev.stopPropagation();
+            },
+            { passive: true }
+          );
+          popupRight.addEventListener(
+            "touchmove",
+            (ev) => {
+              ev.stopPropagation();
+            },
+            { passive: false }
+          );
+        }
 
-				// animate transform for map to focus on marker (optional subtle zoom)
-				// play an extra short flourish sound if desired (re-using clickAudio)
-			}
-			function closePopup() {
-				popupRoot.innerHTML = "";
-			}
+        // animate transform for map to focus on marker (optional subtle zoom)
+        // play an extra short flourish sound if desired (re-using clickAudio)
+      }
+      function closePopup() {
+        popupRoot.innerHTML = "";
+      }
 
-			// toggles
-			const projectsCheckbox =
-				document.getElementById("projects-checkbox");
-			const salesCheckbox = document.getElementById("sales-checkbox");
-			function applyToggles() {
-				const markers = mapInner.querySelectorAll(".marker");
-				markers.forEach((m) => {
-					const g = m.dataset.group || "";
-					if (g === "projects")
-						m.style.display = projectsCheckbox.checked
-							? "flex"
-							: "none";
-					if (g === "sales")
-						m.style.display = salesCheckbox.checked
-							? "flex"
-							: "none";
-				});
-			}
-			projectsCheckbox.addEventListener("change", applyToggles);
-			salesCheckbox.addEventListener("change", applyToggles);
-			salesCheckbox.checked = false;
-			applyToggles();
+      // toggles
+      const projectsCheckbox = document.getElementById("projects-checkbox");
+      const salesCheckbox = document.getElementById("sales-checkbox");
+      function applyToggles() {
+        const markers = mapInner.querySelectorAll(".marker");
+        markers.forEach((m) => {
+          const g = m.dataset.group || "";
+          if (g === "projects")
+            m.style.display = projectsCheckbox.checked ? "flex" : "none";
+          if (g === "sales")
+            m.style.display = salesCheckbox.checked ? "flex" : "none";
+        });
+      }
+      projectsCheckbox.addEventListener("change", applyToggles);
+      salesCheckbox.addEventListener("change", applyToggles);
+      salesCheckbox.checked = false;
+      applyToggles();
 
-			let ro = new ResizeObserver(() => {
-				onImageReady();
-			});
-			ro.observe(mapImage);
+      let ro = new ResizeObserver(() => {
+        onImageReady();
+      });
+      ro.observe(mapImage);
 
-			(function starfield() {
-				const c = document.getElementById("stars");
-				const ctx = c.getContext("2d");
-				let w,
-					h,
-					stars = [];
-				function resize() {
-					w = innerWidth;
-					h = innerHeight;
-					c.width = w;
-					c.height = h;
-					init();
-				}
-				function init() {
-					stars = [];
-					for (let i = 0; i < 120; i++) {
-						stars.push({
-							x: Math.random() * w,
-							y: Math.random() * h,
-							r: Math.random() * 1.6 + 0.2,
-							a: Math.random() * 0.9,
-						});
-					}
-				}
-				function draw() {
-					ctx.clearRect(0, 0, w, h);
-					for (const s of stars) {
-						ctx.globalAlpha = s.a;
-						ctx.beginPath();
-						ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-						ctx.fillStyle = "#8ab6ff";
-						ctx.fill();
-					}
-				}
-				window.addEventListener("resize", resize);
-				resize();
-				function loop() {
-					for (const s of stars) {
-						s.x += (Math.random() - 0.5) * 0.4;
-						s.y += (Math.random() - 0.5) * 0.4;
-						s.a = 0.6 + Math.sin(Date.now() / 1000 + s.x) * 0.3;
-					}
-					draw();
-					requestAnimationFrame(loop);
-				}
-				loop();
-			})();
+      (function starfield() {
+        const c = document.getElementById("stars");
+        const ctx = c.getContext("2d");
+        let w,
+          h,
+          stars = [];
+        function resize() {
+          w = innerWidth;
+          h = innerHeight;
+          c.width = w;
+          c.height = h;
+          init();
+        }
+        function init() {
+          stars = [];
+          for (let i = 0; i < 120; i++) {
+            stars.push({
+              x: Math.random() * w,
+              y: Math.random() * h,
+              r: Math.random() * 1.6 + 0.2,
+              a: Math.random() * 0.9,
+            });
+          }
+        }
+        function draw() {
+          ctx.clearRect(0, 0, w, h);
+          for (const s of stars) {
+            ctx.globalAlpha = s.a;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = "#8ab6ff";
+            ctx.fill();
+          }
+        }
+        window.addEventListener("resize", resize);
+        resize();
+        function loop() {
+          for (const s of stars) {
+            s.x += (Math.random() - 0.5) * 0.4;
+            s.y += (Math.random() - 0.5) * 0.4;
+            s.a = 0.6 + Math.sin(Date.now() / 1000 + s.x) * 0.3;
+          }
+          draw();
+          requestAnimationFrame(loop);
+        }
+        loop();
+      })();
 
-			window.addMarker = function (opts) {
-				const el = document.createElement("div");
-				el.className = "marker";
-				el.dataset.id = opts.id || "m" + Date.now();
-				el.dataset.x = opts.x || 0;
-				el.dataset.y = opts.y || 0;
-				el.dataset.group = opts.group || "projects";
-				if (opts.type) el.dataset.type = opts.type;
-				if (opts.image) el.dataset.image = opts.image;
-				if (opts.desc) el.dataset.desc = opts.desc;
-				el.innerHTML = `<div class="badge">${(
-					opts.label ||
-					opts.id ||
-					"M"
-				).slice(0, 2)}</div><div class="label">${
-					opts.label || opts.id
-				}</div>`;
-				mapInner.appendChild(el);
-				onImageReady();
-				applyToggles();
-				return el;
-			};
+      window.addMarker = function (opts) {
+        const el = document.createElement("div");
+        el.className = "marker";
+        el.dataset.id = opts.id || "m" + Date.now();
+        el.dataset.x = opts.x || 0;
+        el.dataset.y = opts.y || 0;
+        el.dataset.group = opts.group || "projects";
+        if (opts.type) el.dataset.type = opts.type;
+        if (opts.image) el.dataset.image = opts.image;
+        if (opts.desc) el.dataset.desc = opts.desc;
+        el.innerHTML = `<div class="badge">${(
+          opts.label ||
+          opts.id ||
+          "M"
+        ).slice(0, 2)}</div><div class="label">${opts.label || opts.id}</div>`;
+        mapInner.appendChild(el);
+        onImageReady();
+        applyToggles();
+        return el;
+      };
 
-			window.addEventListener("keydown", (e) => {
-				if (e.key === "+") document.getElementById("zoom-in").click();
-				if (e.key === "-") document.getElementById("zoom-out").click();
-			});
-		</script>
-	</body>
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "+") document.getElementById("zoom-in").click();
+        if (e.key === "-") document.getElementById("zoom-out").click();
+      });
+    </script>
+  </body>
 </html>
