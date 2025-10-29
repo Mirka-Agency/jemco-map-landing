@@ -280,6 +280,30 @@
 				overflow: hidden;
 				position: relative;
 			}
+
+			/* For vertical screens/mobile, make popup content stack vertically */
+			@media (max-width: 768px) {
+				.popup-full {
+					flex-direction: column;
+					max-height: 90vh;
+				}
+				.popup-left {
+					flex: 0 0 auto;
+					min-width: 100%;
+					max-height: 30vh;
+				}
+				.popup-left img {
+					border-radius: 8px 8px 0 0 !important;
+					height: 100%;
+					object-fit: cover;
+				}
+				.popup-right {
+					flex: 1;
+					overflow-y: auto;
+					max-height: 60vh;
+				}
+			}
+
 			.popup-left {
 				flex: 0 0 42%;
 				min-width: 320px;
