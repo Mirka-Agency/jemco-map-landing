@@ -809,6 +809,7 @@
               <p>
                 الکتروموتور فشار قوی 3750 کیلوواتی جمکو با ولتاژ 6.3 کیلوولت و 6 قطب، محصولی سفارشی برای پروژه سیمان فراز فیروزکوه است که جایگزین مستقیم موتور ELIN اتریش شده است. این موتور با راندمان 96٪، طراحی ویژه IC511 و عملکرد دائم S1، برای سخت‌ترین شرایط کاری ساخته شده است. در بازهٔ زمانی تنها 120 روز توسط متخصصان جمکو طراحی و تولید شد تا توان واقعی صنعت داخلی را نشان دهد. سیستم خنک‌کاری سفارشی و روتور سیم‌پیچی، عملکرد پایدار آسیاب را تضمین می‌کند.
               </p>
+			  <ul>
 <li>ولتاژ: 6300V</li>
 <li>قطب: 10</li>
 <li>فریم سایز: 1000</li>
@@ -2104,6 +2105,84 @@ www.kalasanati.com<br/>
 				if (e.key === "+") document.getElementById("zoom-in").click();
 				if (e.key === "-") document.getElementById("zoom-out").click();
 			});
+
+			// Portrait/tall-screen popup stacking: ensure image on top, text below
+			(function () {
+				const STYLE_ID = "portrait-popup-fix-inline";
+				function injectPortraitCSS() {
+					if (document.getElementById(STYLE_ID)) return;
+					const css = `\
+		/* Portrait popup stacking: image on top, text below */\
+		html.portrait .popup-full {\
+			display: flex !important;\
+			flex-direction: column !important;\
+			align-items: stretch !important;\
+			width: min(96vw, 760px) !important;\
+			max-height: 62vh !important;\
+			box-sizing: border-box !important;\
+		}\
+		html.portrait .popup-full .popup-left {\
+			width: 100% !important;\
+			order: 0 !important;\
+			flex: 0 0 auto !important;\
+			height: var(--popup-img-h, 25vh) !important;\
+			max-height: var(--popup-img-h, 30vh) !important;\
+			box-sizing: border-box !important;\
+		}\
+		html.portrait .popup-full .popup-left img {\
+			width: 100% !important;\
+			height: 100% !important;\
+			object-fit: cover !important;\
+			display: block !important;\
+		}\
+		html.portrait .popup-full .popup-right {\
+			width: 100% !important;\
+			order: 1 !important;\
+			flex: 1 1 auto !important;\
+			min-height: 0 !important; /* allow flex children to shrink and enable overflow */\
+			overflow-y: auto !important;\
+			-webkit-overflow-scrolling: touch !important;\
+			padding: 1rem !important;\
+			box-sizing: border-box !important;\
+		}\
+		html.portrait .popup-full .popup-right * {\
+			touch-action: auto !important;\
+		}\
+		`;
+					const s = document.createElement("style");
+					s.id = STYLE_ID;
+					s.appendChild(document.createTextNode(css));
+					document.head.appendChild(s);
+				}
+
+				function removePortraitCSS() {
+					const s = document.getElementById(STYLE_ID);
+					if (s) s.remove();
+				}
+
+				function setPortraitClass(enabled) {
+					if (enabled)
+						document.documentElement.classList.add("portrait");
+					else document.documentElement.classList.remove("portrait");
+				}
+
+				function checkAndApplyPortrait() {
+					const isPortrait = window.innerHeight > window.innerWidth;
+					if (isPortrait) {
+						injectPortraitCSS();
+						setPortraitClass(true);
+					} else {
+						setPortraitClass(false);
+						removePortraitCSS();
+					}
+				}
+
+				checkAndApplyPortrait();
+				window.addEventListener("resize", checkAndApplyPortrait);
+				window.addEventListener("orientationchange", () =>
+					setTimeout(checkAndApplyPortrait, 120)
+				);
+			})();
 		</script>
 	</body>
 </html>
