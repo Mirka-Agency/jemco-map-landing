@@ -17,6 +17,20 @@
 		/>
 
 		<link rel="stylesheet" href="assets/css/foulad.css" />
+
+		<style>
+			/* hero background: desktop by default, mobile override below */
+			#hero {
+				background-image: url("assets/img/bg1.jpg");
+				background-repeat: no-repeat;
+				background-size: cover;
+			}
+			@media (max-width: 768px), (orientation: portrait) {
+				#hero {
+					background-image: url("assets/img/bg1-mobile.jpg");
+				}
+			}
+		</style>
 		<script type="text/javascript">
 			(function (c, l, a, r, i, t, y) {
 				c[a] =
@@ -50,14 +64,7 @@
 			</div>
 		</header>
 
-		<section
-			id="hero"
-			style="
-				background-image: url('assets/img/bg1.jpg');
-				background-repeat: no-repeat;
-				background-size: cover;
-			"
-		>
+		<section id="hero">
 			<div class="hero-content">
 				<h1 class="animate-on-scroll">فراتر از استاندارد</h1>
 				<p class="sub-headline animate-on-scroll">
@@ -75,6 +82,63 @@
 					alt="JEMCO 1900kW Electromotor"
 					class="product-image"
 				/> -->
+			</div>
+		</section>
+		<section id="comparison">
+			<h2 class="animate-on-scroll">بهره‌وری و صرفه‌جویی واقعی</h2>
+			<p class="comparison-intro animate-on-scroll">
+				در نمودار زیر مقدار صرفه‌جویی محصول جمکو دربرابر رقبای اروپایی
+				را مشاهده می‌کنید.
+			</p>
+
+			<div class="chart-wrapper animate-on-scroll">
+				<div
+					style="
+						display: flex;
+						justify-content: center;
+						margin-bottom: 14px;
+					"
+				>
+					<!--<div
+						style="
+							background: rgba(255, 255, 255, 0.03);
+							padding: 6px 12px;
+							border-radius: 999px;
+							border: 1px solid rgba(255, 255, 255, 0.04);
+						"
+					>
+						 <strong>صرفه‌جویی در هزینه ها</strong> 
+					</div>-->
+				</div>
+				<div class="chart-container">
+					<canvas id="savingsChart"></canvas>
+				</div>
+				<div
+					class="chart-desc"
+					style="
+						text-align: center;
+						margin-top: 10px;
+						color: var(--color-text-secondary);
+						font-size: 0.95rem;
+					"
+				>
+					جمکو در سال نسبت به زیمنس حدود
+					<strong>6.5 میلیارد تومان</strong> و نسبت به ABB حدود
+					<strong>9.5 میلیارد تومان</strong> صرفه‌جویی دارد. (برای 8
+					دستگاه تولید شده).
+				</div>
+				<div class="chart-controls">
+					<label for="years-slider">تعداد سال‌های بهره‌برداری:</label>
+					<input
+						type="range"
+						id="years-slider"
+						min="1"
+						max="15"
+						value="5"
+						step="1"
+					/>
+					<span id="years-display">5 سال</span>
+				</div>
 			</div>
 		</section>
 
@@ -167,63 +231,6 @@
 					می‌کند، سهم خود را در حل <strong>بحران انرژی</strong> ادا
 					کردیم. 🇮🇷
 				</p>
-			</div>
-		</section>
-		<section id="comparison">
-			<h2 class="animate-on-scroll">بهره‌وری و صرفه‌جویی واقعی</h2>
-			<p class="comparison-intro animate-on-scroll">
-				در نمودار زیر مقدار صرفه‌جویی محصول جمکو دربرابر رقبای اروپایی
-				را مشاهده می‌کنید.
-			</p>
-
-			<div class="chart-wrapper animate-on-scroll">
-				<div
-					style="
-						display: flex;
-						justify-content: center;
-						margin-bottom: 14px;
-					"
-				>
-					<!--<div
-						style="
-							background: rgba(255, 255, 255, 0.03);
-							padding: 6px 12px;
-							border-radius: 999px;
-							border: 1px solid rgba(255, 255, 255, 0.04);
-						"
-					>
-						 <strong>صرفه‌جویی در هزینه ها</strong> 
-					</div>-->
-				</div>
-				<div class="chart-container">
-					<canvas id="savingsChart"></canvas>
-				</div>
-				<div
-					class="chart-desc"
-					style="
-						text-align: center;
-						margin-top: 10px;
-						color: var(--color-text-secondary);
-						font-size: 0.95rem;
-					"
-				>
-					جمکو در سال نسبت به زیمنس حدود
-					<strong>6.5 میلیارد تومان</strong> و نسبت به ABB حدود
-					<strong>9.5 میلیارد تومان</strong> صرفه‌جویی دارد. (برای 8
-					دستگاه تولید شده).
-				</div>
-				<div class="chart-controls">
-					<label for="years-slider">تعداد سال‌های بهره‌برداری:</label>
-					<input
-						type="range"
-						id="years-slider"
-						min="1"
-						max="15"
-						value="5"
-						step="1"
-					/>
-					<span id="years-display">5 سال</span>
-				</div>
 			</div>
 		</section>
 
