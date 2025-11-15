@@ -113,7 +113,24 @@
 				<div class="chart-container">
 					<canvas id="savingsChart"></canvas>
 				</div>
+				<!-- Fixed savings tooltip (populated by foulad.js external tooltip) -->
 				<div
+					id="savings-tooltip"
+					style="
+						display: none;
+						padding: 10px 14px;
+						border-radius: 8px;
+						background: rgba(10, 12, 25, 0.9);
+						color: #e8eef8;
+						border: 1px solid rgba(255, 255, 255, 0.04);
+						font-family: Vazirmatn;
+						text-align: center;
+						margin: 6px auto;
+						max-width: 720px;
+					"
+				></div>
+				<div
+					id="chart-desc"
 					class="chart-desc"
 					style="
 						text-align: center;

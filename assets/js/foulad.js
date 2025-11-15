@@ -54,6 +54,56 @@ document.addEventListener("DOMContentLoaded", function () {
 	Chart.defaults.plugins.tooltip.cornerRadius = 5;
 
 	// --- Create the Chart Instance ---
+	// External tooltip: render selected point details into a fixed DOM node above the chart
+	function externalSavingsTooltip(context) {
+		const { chart, tooltip } = context;
+		// find or create container placed above the chart canvas
+		const chartContainer =
+			chart.canvas.closest(".chart-container") || chart.canvas.parentNode;
+		let container =
+			chartContainer.parentNode.querySelector("#savings-tooltip");
+		if (!container) {
+			container = document.createElement("div");
+			container.id = "savings-tooltip";
+			container.style.cssText =
+				"display:none;padding:8px 12px;border-radius:8px;background:rgba(10,12,25,0.9);color:#e8eef8;border:1px solid rgba(255,255,255,0.04);font-family:Vazirmatn;text-align:center;margin-bottom:8px;";
+			chartContainer.parentNode.insertBefore(container, chartContainer);
+		}
+
+		// Hide when no tooltip
+		if (
+			tooltip.opacity === 0 ||
+			!tooltip.dataPoints ||
+			tooltip.dataPoints.length === 0
+		) {
+			container.style.display = "none";
+			return;
+		}
+
+		// Build content: year + each dataset label and value
+		const dp = tooltip.dataPoints[0];
+		const idx = dp.dataIndex;
+		const yearLabel =
+			(chart.data.labels && chart.data.labels[idx]) ||
+			`<strong>سال ${idx + 1}</strong>`;
+		let html = `<div style="font-weight:700;margin-bottom:6px;">${yearLabel}</div>`;
+		tooltip.dataPoints.forEach((p) => {
+			const label = p.dataset.label || "";
+			const value =
+				typeof p.raw === "number"
+					? p.raw
+					: p.parsed && p.parsed.y
+					? p.parsed.y
+					: p.raw;
+			const formatted = (Number(value) || 0).toLocaleString(undefined, {
+				maximumFractionDigits: 2,
+			});
+			html += `<div style="font-size:0.95rem"><strong>${label}</strong>: ${formatted} میلیارد تومان</div>`;
+		});
+		container.innerHTML = html;
+		container.style.display = "block";
+	}
+
 	const savingsChart = new Chart(ctx, {
 		type: "line",
 		data: {
@@ -129,23 +179,12 @@ document.addEventListener("DOMContentLoaded", function () {
 						pointStyle: "rectRounded",
 					},
 				},
+				// disable the default floating tooltip and use an external renderer
 				tooltip: {
+					enabled: false,
+					external: externalSavingsTooltip,
 					mode: "index",
 					intersect: false,
-					callbacks: {
-						// Tooltip formatting will be handled dynamically and localized
-						label: function (context) {
-							let label = context.dataset.label || "";
-							if (label) label += " — ";
-							if (context.parsed.y !== null) {
-								label +=
-									context.parsed.y.toLocaleString(undefined, {
-										maximumFractionDigits: 2,
-									}) + " میلیارد تومان";
-							}
-							return label;
-						},
-					},
 				},
 			},
 			interaction: {
