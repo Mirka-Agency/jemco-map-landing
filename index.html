@@ -271,6 +271,10 @@
 				position: relative;
 			}
 
+			.titlebar .gap {
+				width: 16px;
+			}
+
 			/* For vertical screens/mobile, make popup content stack vertically */
 			@media (max-width: 768px) {
 				.popup-full {
@@ -486,6 +490,99 @@
 				font-size: 12px;
 				color: var(--muted);
 			}
+			/* Mobile/portrait: hide titlebar to prevent overlap on vertical devices */
+			@media (max-width: 900px), (orientation: portrait) {
+				.titlebar {
+					bottom: 18px;
+					top: unset;
+					left: 0;
+					right: 0;
+					transform: unset;
+				}
+				.titlebar .gap {
+					width: 8px;
+				}
+
+				.titlebar .contact-btn {
+					padding: 6px;
+				}
+				.hint {
+					display: none;
+				}
+				.copyright {
+					bottom: 0;
+					left: 0;
+					border-radius: 0;
+					padding: 0;
+					width: 100%;
+					text-align: center;
+				}
+
+				.btn {
+					width: 36px;
+					height: 36px;
+				}
+			}
+			/* Mobile footer bar (shown only on mobile/portrait) */
+			.mobile-footer-bar {
+				display: none;
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				background: linear-gradient(
+					180deg,
+					rgba(8, 12, 18, 0.98),
+					rgba(6, 8, 12, 0.98)
+				);
+				border-top: 1px solid rgba(255, 255, 255, 0.04);
+				padding: 8px 12px;
+				z-index: 65;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 10px;
+			}
+			.mobile-footer-bar .brand {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				flex: 1;
+				min-width: 0;
+			}
+			.mobile-footer-bar .brand img {
+				height: 24px;
+				width: auto;
+			}
+			.mobile-footer-bar .brand h1 {
+				margin: 0;
+				font-size: 12px;
+				font-weight: 600;
+				letter-spacing: 0.4px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.mobile-footer-bar .cta-btn {
+				padding: 6px 12px;
+				font-size: 11px;
+				border-radius: 6px;
+				background: var(--accent-2);
+				color: #fff;
+				border: none;
+				cursor: pointer;
+				white-space: nowrap;
+				flex-shrink: 0;
+			}
+			@media (max-width: 900px), (orientation: portrait) {
+				.mobile-footer-bar {
+					display: flex !important;
+				}
+				.app {
+					padding-bottom: 60px;
+				}
+			}
+
 			.audio-toggle {
 				display: inline-grid;
 				place-items: center;
@@ -791,14 +888,12 @@
 		</audio>
 
 		<div class="titlebar">
-			<button id="contactBtn" class="contact-btn">
-				ثبت سفارش و درخواست مشاوره
-			</button>
+			<button id="contactBtn" class="contact-btn">ثبت سفارش</button>
 			<div style="display: flex; flex-direction: column">
 				<h1>شرکت جمکو و راهکار های صنعت و معدن</h1>
 				<small>هلدینگ صنایع معدنی کاوه پارس </small>
 			</div>
-			<div style="width: 18px"></div>
+			<div class="gap"></div>
 			<div
 				title="Toggle background audio"
 				id="audioToggle"
