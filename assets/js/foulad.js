@@ -446,4 +446,12 @@ document.addEventListener("DOMContentLoaded", function () {
 			e.preventDefault();
 			openRequestForm();
 		});
+
+	// Fixed CTA button
+	const fixedRequestBtn = document.getElementById("fixedRequestBtn");
+	if (fixedRequestBtn)
+		fixedRequestBtn.addEventListener("click", (e) => {
+			e.preventDefault();
+			openRequestForm();
+		});
 });
