@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>پروژه های جمکو</title>
+		<link
+			href="assets/fonts/vazirmatn-v33.003/Vazirmatn-Variable-font-face.css"
+			rel="stylesheet"
+		/>
+		<link rel="icon" href="assets/img/fav.png" sizes="192x192" />
+		<style>
+			:root {
+				--bg: #071022; /* dark deep */
+				--panel: #0f1724cc;
+				--accent: #6ee7b7;
+				--accent-2: #7c5cff;
+				--muted: #9aa8b2;
+				--glass: rgba(255, 255, 255, 0.04);
+				--neon: 0 0 16px rgba(124, 92, 255, 0.22),
+					0 0 40px rgba(110, 231, 183, 0.06);
+				--ui-size: 56px;
+				--body: #04101a;
+				--border: #335;
+				--backdrop-color: rgba(0, 0, 0, 0.8);
+				--background-glass: linear-gradient(
+					90deg,
+					rgba(255, 255, 255, 0.06),
+					rgba(255, 255, 255, 0.05)
+				);
+
+				--input-color: rgba(255, 255, 255, 0.05);
+			}
+			/* Light theme overrides */
+			:root.light-mode {
+				--bg: #f5f5f5;
+				--panel: rgba(255, 255, 255, 0.9);
+				--muted: #555;
+				--accent: #30b983;
+				--accent-2: #694be2;
+				--glass: rgba(0, 0, 0, 0.02);
+				--body: #c3e4ff;
+				--border: #fff;
+				--backdrop-color: rgba(f, f, f, 0.8);
+				--background-glass: linear-gradient(
+					90deg,
+					rgba(0, 0, 0, 0.06),
+					rgba(0, 0, 0, 0.05)
+				);
+				--input-color: rgba(0, 0, 0, 0.05);
+			}
+			:root.light-mode body {
+				color: #222;
+			}
+			/* Target the scrollbar */
+			::-webkit-scrollbar {
+				width: 6px;
+				height: 6px;
+			}
+
+			/* Track (background) */
+			::-webkit-scrollbar-track {
+				background: var(--bg);
+				border-radius: 6px;
+			}
+
+			/* Handle (thumb) */
+			::-webkit-scrollbar-thumb {
+				background: #243a5ecc;
+				border-radius: 6px;
+			}
+
+			/* Handle on hover */
+			::-webkit-scrollbar-thumb:hover {
+				background: #243a5ecc;
+			}
+
+			html,
+			body {
+				height: 100%;
+				margin: 0;
+				font-family: "Vazirmatn", ui-sans-serif, system-ui,
+					-apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+			}
+			body {
+				background: radial-gradient(
+						circle at 10% 10%,
+						rgba(124, 92, 255, 0.06),
+						transparent 10%
+					),
+					linear-gradient(180deg, var(--body) 0%, var(--bg) 60%);
+				color: #dfe9f2;
+				overflow: hidden;
+			}
+
+			#stars {
+				position: fixed;
+				left: 0;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				pointer-events: none;
+				mix-blend-mode: screen;
+				opacity: 0.5;
+			}
+
+			.app {
+				height: 100%;
+				display: grid;
+				grid-template-columns: 1fr;
+				align-items: center;
+				justify-items: center;
+			}
+
+			.controls {
+				position: fixed;
+				right: 22px;
+				top: 22px;
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+				z-index: 60;
+			}
+			.toggle-group {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				align-items: flex-end;
+			}
+
+			.btn {
+				width: var(--ui-size);
+				height: var(--ui-size);
+				display: inline-grid;
+				place-items: center;
+				border-radius: 12px;
+				background-color: #eee;
+				backdrop-filter: blur(6px);
+				box-shadow: var(--neon);
+				border: 1px solid rgba(255, 255, 255, 0.04);
+				cursor: pointer;
+			}
+			.btn svg {
+				width: 22px;
+				height: 22px;
+				opacity: 0.95;
+			}
+			.btn:active {
+				transform: translateY(2px) scale(0.99);
+			}
+			.group-toggle {
+				/* padding: 8px 12px; */
+				border-radius: 999px;
+				background: var(--background-glass);
+				backdrop-filter: blur(3px);
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				display: flex;
+				gap: 8px;
+				align-items: center;
+				padding: 2px 8px;
+			}
+
+			.viewport {
+				width: 100%;
+				max-width: 100%;
+				height: 100%;
+				background: linear-gradient(
+					180deg,
+					rgba(12, 20, 30, 0.35),
+					rgba(6, 10, 14, 0.4)
+				);
+
+				position: relative;
+				overflow: hidden;
+			}
+
+			.map-frame {
+				position: absolute;
+				inset: 0;
+				border-radius: 12px;
+				overflow: hidden;
+				background: linear-gradient(
+					180deg,
+					rgba(0, 0, 0, 0.12),
+					rgba(0, 0, 0, 0.18)
+				);
+			}
+			.map-inner {
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				transform-origin: 0 0;
+				/* will-change: transform; */
+				touch-action: none;
+			}
+
+			/* navy-blue tint overlay applied over the map image */
+			.map-inner::before {
+				content: "";
+				position: absolute;
+				inset: 0;
+				pointer-events: none;
+				z-index: 10; /* behind markers (markers have z-index:40) */
+			}
+
+			.map-img {
+				display: block;
+				max-width: none;
+				user-select: none;
+				pointer-events: none;
+
+				position: relative;
+				z-index: 0;
+			}
+
+			.marker {
+				position: absolute;
+				transform: translate(-50%, -50%);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 15px;
+				cursor: pointer;
+				transition: transform 0.18s cubic-bezier(0.16, 0.8, 0.3, 1),
+					filter 0.18s;
+				z-index: 40;
+			}
+			.marker .badge {
+				width: 85px;
+				height: 85px;
+				/* 	border-radius: 12px; */
+				display: grid;
+				place-items: center;
+				/* 	background: linear-gradient(
+					180deg,
+					var(--accent),
+					var(--accent-2)
+				); */
+				/* 	box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
+				border: 1px solid rgba(255, 255, 255, 0.06); */
+				font-weight: 700;
+				color: #041022;
+			}
+
+			.marker-glow .badge {
+				width: 150px !important;
+				height: 150px !important;
+			}
+			.marker .badge img {
+				width: 100%;
+				height: 100%;
+			}
+
+			.marker:hover {
+				transform: translate(-50%, -50%) scale(1.12);
+			}
+			.marker .label {
+				font-size: 1.3rem;
+				background: var(--panel);
+				padding: 6px 9px;
+				border-radius: 8px;
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				/* backdrop-filter: blur(6px); */
+				white-space: nowrap;
+			}
+
+			/* popup: semi full-screen */
+			.popup-full-backdrop {
+				position: fixed;
+				inset: 0;
+				background: linear-gradient(
+					180deg,
+					rgba(2, 6, 12, 0.6),
+					rgba(2, 6, 12, 0.8)
+				);
+				backdrop-filter: blur(6px);
+				z-index: 120;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.popup-full {
+				width: 92vw;
+				max-width: 80vw;
+				height: 86vh;
+				border-radius: 14px;
+				background: linear-gradient(180deg, var(--bg), var(--bg));
+				box-shadow: 0 30px 80px rgba(2, 6, 12, 0.75);
+				border: 1px solid rgba(255, 255, 255, 0.04);
+				display: flex;
+				overflow: hidden;
+				position: relative;
+			}
+
+			.titlebar .gap {
+				width: 16px;
+			}
+
+			/* For vertical screens/mobile, make popup content stack vertically */
+			@media (max-width: 768px) {
+				.popup-full {
+					flex-direction: column;
+					max-height: 90vh;
+				}
+				.popup-left {
+					flex: 0 0 auto;
+					min-width: 100%;
+					max-height: 30vh;
+				}
+				.popup-left img {
+					border-radius: 8px 8px 0 0 !important;
+					height: 100%;
+					object-fit: cover;
+				}
+				.popup-right {
+					flex: 1;
+					overflow-y: auto;
+					max-height: 60vh;
+				}
+			}
+
+			.popup-left {
+				flex: 0 0 42%;
+				min-width: 320px;
+				background: linear-gradient(
+					180deg,
+					rgba(255, 255, 255, 0.02),
+					rgba(255, 255, 255, 0.01)
+				);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.popup-left img {
+				max-width: 100%;
+				max-height: 100%;
+				height: 100%;
+				width: 100%;
+				object-fit: cover;
+				border-radius: 8px 0 0 8px;
+				box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
+			}
+			.popup-right {
+				flex: 1;
+				padding: 22px 26px;
+				overflow: auto;
+				direction: rtl;
+			}
+			.popup-right h2 {
+				margin: 0 0 8px 0;
+				font-size: 20px;
+			}
+			.popup-right p {
+				color: var(--muted);
+				line-height: 1.5;
+			}
+			.popup-actions {
+				margin-top: 16px;
+				display: flex;
+				gap: 10px;
+			}
+			.close {
+				width: 36px;
+				height: 36px;
+				border-radius: 8px;
+				display: grid;
+				place-items: center;
+				cursor: pointer !important;
+			}
+
+			.popup-iframe .close {
+				position: absolute;
+				top: 0;
+				right: 0;
+				color: #fff;
+			}
+
+			.legend {
+				position: fixed;
+				left: 22px;
+				top: 22px;
+				background: var(--background-glass);
+				padding: 10px;
+				border-radius: 12px;
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				backdrop-filter: blur(3px);
+				z-index: 60;
+			}
+			.legend h3 {
+				margin: 0 0 8px 0;
+				font-size: 13px;
+			}
+
+			.hint {
+				direction: rtl;
+				position: fixed;
+				right: 22px;
+				bottom: 22px;
+				background: var(--background-glass);
+				backdrop-filter: blur(3px);
+				padding: 10px;
+				border-radius: 12px;
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				font-size: 13px;
+			}
+
+			.copyright {
+				direction: ltr;
+				position: fixed;
+				left: 22px;
+				bottom: 22px;
+				background: var(--background-glass);
+				backdrop-filter: blur(3px);
+				padding: 10px;
+				border-radius: 12px;
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				font-size: 13px;
+			}
+			@media (max-width: 900px) {
+				:root {
+					--ui-size: 48px;
+				}
+
+				/* larger iframe popup (90% of viewport) */
+				.popup-full.popup-iframe {
+					width: 90vw;
+					height: 90vh;
+					max-width: none;
+				}
+				.popup-full.popup-iframe .close {
+					position: absolute;
+					top: 12px;
+					right: 12px;
+					z-index: 130;
+					background: rgba(255, 255, 255, 0.04);
+				}
+				.viewport {
+					height: 100%;
+				}
+			}
+			@media (max-width: 560px) {
+				.marker .badge {
+					width: 85px;
+					height: 85px;
+				}
+				
+
+				.popup-full {
+					width: 96vw;
+					height: 86vh;
+				}
+			}
+
+			@keyframes popupIn {
+				0% {
+					opacity: 0;
+					transform: translateY(10px) scale(0.99);
+				}
+				100% {
+					opacity: 1;
+					transform: translateY(0) scale(1);
+				}
+			}
+			.popup-animate {
+				animation: popupIn 0.32s cubic-bezier(0.22, 0.9, 0.2, 1);
+			}
+
+			@keyframes pulse {
+				0% {
+					transform: scale(0.9);
+				}
+				50% {
+					transform: scale(1.06);
+				}
+				100% {
+					transform: scale(0.9);
+				}
+			}
+			.pulse {
+				animation: pulse 3s ease-in-out infinite;
+			}
+
+			.titlebar {
+				text-align: right;
+				position: fixed;
+				left: 50%;
+				transform: translateX(-50%);
+				top: 14px;
+				z-index: 70;
+				padding: 10px 18px;
+				border-radius: 999px;
+				background: var(--background-glass);
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				backdrop-filter: blur(3px);
+				display: flex;
+				gap: 14px;
+				align-items: center;
+			}
+			.titlebar h1 {
+				margin: 0;
+				font-size: 16px;
+				letter-spacing: 0.6px;
+			}
+			.titlebar small {
+				display: block;
+				font-size: 12px;
+				color: var(--muted);
+			}
+			/* Mobile/portrait: hide titlebar to prevent overlap on vertical devices */
+			@media (max-width: 900px), (orientation: portrait) {
+				.titlebar {
+					bottom: 18px;
+					top: unset;
+					left: 0;
+					right: 0;
+					transform: unset;
+				}
+				.titlebar .gap {
+					width: 8px;
+				}
+
+				.titlebar .contact-btn {
+					padding: 6px;
+				}
+				.hint {
+					display: none;
+				}
+				.copyright {
+					bottom: 0;
+					left: 0;
+					border-radius: 0;
+					padding: 0;
+					width: 100%;
+					text-align: center;
+				}
+
+				.btn {
+					width: 36px;
+					height: 36px;
+				}
+			}
+			/* Mobile footer bar (shown only on mobile/portrait) */
+			.mobile-footer-bar {
+				display: none;
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				background: linear-gradient(
+					180deg,
+					rgba(8, 12, 18, 0.98),
+					rgba(6, 8, 12, 0.98)
+				);
+				border-top: 1px solid rgba(255, 255, 255, 0.04);
+				padding: 8px 12px;
+				z-index: 65;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 10px;
+			}
+			.mobile-footer-bar .brand {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				flex: 1;
+				min-width: 0;
+			}
+			.mobile-footer-bar .brand img {
+				height: 24px;
+				width: auto;
+			}
+			.mobile-footer-bar .brand h1 {
+				margin: 0;
+				font-size: 12px;
+				font-weight: 600;
+				letter-spacing: 0.4px;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.mobile-footer-bar .cta-btn {
+				padding: 6px 12px;
+				font-size: 11px;
+				border-radius: 6px;
+				background: var(--accent-2);
+				color: #fff;
+				border: none;
+				cursor: pointer;
+				white-space: nowrap;
+				flex-shrink: 0;
+			}
+			@media (max-width: 900px), (orientation: portrait) {
+				.mobile-footer-bar {
+					display: flex !important;
+				}
+				.app {
+					padding-bottom: 60px;
+				}
+			}
+
+			.audio-toggle {
+				display: inline-grid;
+				place-items: center;
+				width: 36px;
+				height: 36px;
+				border-radius: 8px;
+				background: rgba(255, 255, 255, 0.02);
+				border: 1px solid rgba(255, 255, 255, 0.03);
+				cursor: pointer;
+			}
+			/* Show pause icon when audio is playing */
+			#audioToggle.playing svg path {
+				d: path("M6 4h4v16H6V4zm8 0h4v16h-4V4z");
+			}
+
+			.sales-popup-item {
+				background-color: rgba(185, 185, 225, 0.2);
+				padding: 12px;
+				border-radius: 12px;
+				margin-bottom: 12px;
+			}
+
+			.sales-popup-item h4 {
+				font-size: 1.4rem;
+				font-weight: bold;
+			}
+
+			iframe {
+				border-radius: 15px;
+			}
+
+			.inline-popup-image {
+				width: 100%;
+				object-fit: contain;
+				margin: 12px;
+				border-radius: 12px;
+			}
+
+			.popup-full.popup-iframe {
+				border: 5px solid #fff;
+			}
+
+			.contact-btn {
+				background: linear-gradient(
+					90deg,
+					var(--accent),
+					var(--accent-2)
+				);
+				color: #fff;
+				border: none;
+				padding: 12px 24px;
+				border-radius: 8px;
+				cursor: pointer;
+				font-family: inherit;
+				font-size: 14px;
+				transition: transform 0.2s;
+				z-index: 100;
+			}
+
+			.contact-btn:hover {
+				transform: translateY(-2px);
+			}
+
+			.contact-popup {
+				position: fixed;
+				inset: 0;
+				background: var(--backdrop-color);
+				backdrop-filter: blur(6px);
+				display: none;
+				align-items: center;
+				justify-content: center;
+				z-index: 200;
+			}
+
+			.contact-popup-content {
+				width: 90%;
+				max-width: 400px;
+				background: linear-gradient(180deg, var(--bg), var(--bg));
+				border-radius: 14px;
+				padding: 24px;
+				position: relative;
+				animation: popupIn 0.3s;
+				direction: rtl;
+			}
+
+			.contact-popup h2 {
+				margin: 0 0 20px 0;
+				font-size: 20px;
+			}
+
+			.form-group {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				margin-bottom: 16px;
+			}
+
+			.form-group label {
+				color: var(--muted);
+				font-size: 14px;
+			}
+
+			.form-group input {
+				padding: 10px;
+				border-radius: 6px;
+				border: 1px solid rgba(255, 255, 255, 0.1);
+				background: var(--input-color);
+
+				font-family: inherit;
+			}
+
+			.submit-btn {
+				width: 100%;
+				background: linear-gradient(
+					90deg,
+					var(--accent),
+					var(--accent-2)
+				);
+				color: #fff;
+				border: none;
+				padding: 12px;
+				border-radius: 6px;
+				cursor: pointer;
+				font-family: inherit;
+				margin-top: 10px;
+				transition: opacity 0.2s;
+			}
+
+			.submit-btn:hover {
+				opacity: 0.9;
+			}
+
+			.toast {
+				position: fixed;
+				bottom: 30px;
+				left: 50%;
+				transform: translateX(-50%);
+				background: linear-gradient(
+					90deg,
+					var(--accent),
+					var(--accent-2)
+				);
+				direction: rtl;
+				color: white;
+				padding: 16px 32px;
+				border-radius: 8px;
+				font-size: 14px;
+				z-index: 1000;
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+				opacity: 0;
+				transition: opacity 0.3s ease-in-out;
+			}
+
+			.toast.error {
+				background: linear-gradient(90deg, #ff5e5e, #ff1a1a);
+			}
+
+			.toast.show {
+				opacity: 1;
+			}
+		</style>
+
+		<link rel="preload" as="image" href="assets/img/sales/kerman.jpg" />
+		<link rel="preload" as="image" href="assets/img/sales/mashhad.jpg" />
+		<link rel="preload" as="image" href="assets/img/sales/hamedan.jpg" />
+		<link rel="preload" as="image" href="assets/img/sales/isfahan.jpg" />
+		<link rel="preload" as="image" href="assets/img/sales/khozestan.jpg" />
+		<link rel="preload" as="image" href="assets/img/sales/kurdistan.jpg" />
+		<link rel="preload" as="image" href="assets/img/sales/qazvin.jpg" />
+		<link rel="preload" as="image" href="assets/img/sales/tabriz.jpg" />
+		<link rel="preload" as="image" href="assets/img/sales/tehran.jpg" />
+		<link rel="preload" as="image" href="assets/img/sales/zanjan.jpg" />
+
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/foulad-gharb.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/foulad-khozestan.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/foulad-mobarake.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/foulad-neshabour.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/foulad-sabzevar.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/foulad-sirjan.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/ghori-cement.jpg"
+		/>
+		<link rel="preload" as="image" href="assets/img/projects/golghr.jpg" />
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/mes-meydok.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/siman-faraz.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/siman-sabzevar.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/zobahan-pasargad.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/siman-turkamanestan.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/ab-ghadir.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/forouzandeh.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/naft-shiraz.jpg"
+		/>
+
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/petroshimi-kermanshah.jpg"
+		/>
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/karamabad.jpg"
+		/>
+
+		<link
+			rel="preload"
+			as="image"
+			href="assets/img/projects/ab-hamedan.jpg"
+		/>
+
+		<link rel="preload" as="image" href="assets/img/projects/ramile.jpg" />
+
+		<link rel="preload" as="image" href="assets/img/projects/yekanat.jpg" />
+		<link rel="preload" as="image" href="assets/img/projects/havayar.jpg" />
+		<link rel="preload" as="image" href="assets/img/projects/wasco.jpg" />
+
+		<link rel="preload" as="image" href="assets/img/bg1.jpg" />
+
+		<script type="text/javascript">
+			(function (c, l, a, r, i, t, y) {
+				c[a] =
+					c[a] ||
+					function () {
+						(c[a].q = c[a].q || []).push(arguments);
+					};
+				t = l.createElement(r);
+				t.async = 1;
+				t.src = "https://www.clarity.ms/tag/" + i;
+				y = l.getElementsByTagName(r)[0];
+				y.parentNode.insertBefore(t, y);
+			})(window, document, "clarity", "script", "u0s3mpvqmx");
+		</script>
+	</head>
+	<body>
+		<canvas id="stars"></canvas>
+
+		<audio id="clickAudio" preload="auto">
+			<!-- Provide your click/open sound here -->
+			<source src="assets/audio/tap.mp3" type="audio/mpeg" />
+		</audio>
+
+		<div class="app">
+			<div class="viewport" id="viewport">
+				<div class="map-frame">
+					<div
+						class="map-inner"
+						id="mapInner"
+						style="
+							left: 50%;
+							top: 50%;
+							transform: translate(-50%, -50%) scale(1)
+								translate(0px, 0px);
+						"
+					>
+						<img
+							src="assets/img/map.png"
+							alt="map"
+							class="map-img"
+							id="mapImage"
+						/>
+
+						<div
+							class="marker marker-glow"
+							data-id="p2"
+							data-group="projects"
+							data-x="85"
+							data-y="102"
+							data-url="/msc.html"
+							data-image=""
+						>
+							<div class="badge">
+								<img src="assets/img/projects/msc2.png" />
+							</div>
+							<div class="label">فولاد مبارکه</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="110"
+							data-y="135"
+							data-image="assets/img/projects/golghr.jpg"
+							data-desc="
+							<p>
+                الکتروموتور 4000 کیلوواتی (6.3 کیلوولت، 6 قطب) در فریم سایز 710، به‌طور خاص برای سنگین‌ترین کار آسیاب‌ مواد در معدن گل‌گهر سیرجان طراحی شده است. راندمان عالی 97 درصدی این موتور به معنای کاهش چشمگیر هزینه‌های انرژی و تولید گرمای کمتر در طول کارکرد مداوم (S1) است. با ساختار روتور سیم‌پیچی شده، این موتور به‌راحتی از پس استارت در بارهای سنگین و اینرسی بالا برمی‌آید. سیستم خنک‌کننده IC611 و درجه حفاظت IP55، دوام و پایداری موتور را حتی در شرایط سخت محیطی تضمین می‌کند. این موتور ترکیبی از قدرت بالا، کم‌مصرف بودن و قابلیت اطمینان بالا است.
+              <p>
+                الکتروموتور فشار قوی 3750 کیلوواتی جمکو با ولتاژ 6.3 کیلوولت و 6 قطب، محصولی سفارشی برای پروژه سیمان فراز فیروزکوه است که جایگزین مستقیم موتور ELIN اتریش شده است. این موتور با راندمان 96٪، طراحی ویژه IC511 و عملکرد دائم S1، برای سخت‌ترین شرایط کاری ساخته شده است. در بازهٔ زمانی تنها 120 روز توسط متخصصان جمکو طراحی و تولید شد تا توان واقعی صنعت داخلی را نشان دهد. سیستم خنک‌کاری سفارشی و روتور سیم‌پیچی، عملکرد پایدار آسیاب را تضمین می‌کند.
+              </p>
+			  <ul>
+<li>ولتاژ: 6300V</li>
+<li>قطب: 10</li>
+<li>فریم سایز: 1000</li>
+
+</ul>
+							"
+						>
+							<div class="badge">
+								<img src="assets/img/projects/gol-gohar.png" />
+							</div>
+							<div class="label">شرکت معدنی و صنعتی گل گهر</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="93"
+							data-y="140"
+							data-image="assets/img/projects/zobahan-pasargad.jpg"
+							data-desc="
+							<ul>
+<li>توان: 250kw</li>
+<li>ولتاژ: 6600V</li>
+<li>قطب: 4</li>
+<li>فریم سایز: 315</li>
+
+</ul>
+							"
+						>
+							<div class="badge">
+								<img
+									src="assets/img/projects/zob-pasargad.png"
+								/>
+							</div>
+							<div class="label">ذوب آهن پاسارگاد</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="116"
+							data-y="127"
+							data-image="assets/img/projects/foulad-sirjan.jpg"
+							data-desc="
+              <p>
+                الکتروموتور 250 کیلووات، 6.6 کیلووات، 4 قطب در فریم 315 برای انتقال آب در شرکت ذوب آهن پاسارگاد طراحی شده است. این موتور با راندمان 93.4% و کلاس عایق F، کارایی انرژی بالایی را ارائه می‌دهد. دارای درجه حفاظت IP55 بوده و برای کار مداوم در دمای محیطی 50 درجه سانتی‌گراد طراحی شده است.
+              </p>
+							<ul>
+<li>توان: 315kw</li>
+<li>ولتاژ: 6600V</li>
+<li>قطب: 4</li>
+<li>فریم سایز: 315</li>
+
+</ul>"
+						>
+							<div class="badge">
+								<img
+									src="assets/img/projects/foulad-sirjan.png"
+								/>
+							</div>
+							<div class="label">فولاد سیرجان</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="122"
+							data-y="133"
+							data-image="assets/img/projects/foulad-sirjan.jpg"
+							data-desc="
+              <p>
+                الکتروموتور صنعتی قدرتمند 5500 کیلوواتی با ولتاژ 6.3 کیلوولت و 6 قطب، جهت کاربردهای سنگین آسیاب‌مواد شرکت فولاد زرند ایرانیان طراحی شده است. بهره‌گیری از ساختار روتور سیم‌پیچی (Wound Rotor) امکان مدیریت دقیق پارامترهای راه‌اندازی و کنترل گشتاور در شرایط بارگذاری اولیه را فراهم می‌آورد. این موتور با بهره‌مندی از سیستم خنک‌کننده IC616 و درجه حفاظت IP55، پایداری عملکردی خود را در برابر عوامل محیطی حفظ می‌کند و برای بارهای با اینرسی بالا و تضمین پیوستگی عملیات در خطوط تولید کارخانه فولاد مناسب است.
+              </p>
+              "
+						>
+							<div class="badge">
+								<img
+									src="assets/img/projects/foulad-zarand.png"
+								/>
+							</div>
+							<div class="label">فولاد زرند ایرانیان</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="107"
+							data-y="123"
+							data-image="assets/img/projects/mes-meydok.jpg"
+							data-desc='
+							<p>در جریان عملیات تولید در مجتمع مس میدوک، یکی از الکتروموتور های عظیم آسیاب بال‌میل که ساخت شرکت آمریکایی جنرال الکتریک (GE) بود، دچار آسیب جدی شد. در شرایطی که تحریم ها هرگونه خدمات پس از فروش از سوی سازنده خارجی را ناممکن کرده بود، مدیران این مجتمع برای اورهال و بازسازی موتور با جمکو تماس گرفتند.
+					</p>
+<p>تیم مهندسی جمکو در کوتاه‌ترین زمان ممکن با بازطراحی  و ساخت مجدد استاتور، عملیات اورهال را به‌طور کامل انجام داد و الکتروموتور را به خط تولید بازگرداند. عملکرد موفق و سرعت عمل در اجرای این پروژه باعث شد خط تولید مجتمع بدون توقف طولانی‌مدت به کار خود ادامه دهد.</p>
+
+<p>پس از موفقیت در بازسازی، مدیران میدوک از جمکو خواستند یک دستگاه الکتروموتور جدید مشابه نمونهٔ اصلی برای استفاده در زمان‌های اورهال طراحی و تولید کند. مهندسان جمکو با همکاری دانشگاه‌های برتر کشور، طراحی الکتریکی و مکانیکی این موتور را از پایه انجام دادند و برای نخستین بار در ایران، الکتروموتوری با توان 4000 اسب بخار، 34 قطب و ابعاد غول‌پیکر را با تکیه بر دانش فنی داخلی ساختند.</p>
+<strong>
+این پروژه نقطه عطفی در تاریخ صنعت الکتروموتور کشور و گامی مهم در مسیر خودکفایی و استقلال صنعت مس ایران به‌شمار می‌آید.</strong>
+
+<ul>
+<li>توان: 4000HP</li>
+<li>ولتاژ: 6600V</li>
+<li>قطب: 34</li>
+<li>فریم سایز: 533</li>
+
+</ul>
+<style>.h_iframe-aparat_embed_frame{position:relative;}.h_iframe-aparat_embed_frame .ratio{display:block;width:100%;height:auto;}.h_iframe-aparat_embed_frame iframe{position:absolute;top:0;left:0;width:100%;height:100%;}</style><div class="h_iframe-aparat_embed_frame"><span style="display: block;padding-top: 57%"></span><iframe src="https://www.aparat.com/video/video/embed/videohash/z54c4os/vt/frame?recom=self"  allowFullScreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe></div>
+'
+						>
+							<div class="badge">
+								<img src="assets/img/projects/mes-iran.png" />
+							</div>
+							<div class="label">مجتمع مس میدوک</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="84"
+							data-y="88"
+							data-image="assets/img/projects/foulad-gharb.jpg"
+							data-desc='شرکت فولاد غرب آسیا برای اورهال خط تولید خود با چالشی جدی روبه رو بود. آنها نیازمند الکتروموتورهای جایگزین برای موتورهای برند WEG بودند؛ موتورهایی با سه توان متفاوت (2200 و 2500 و 2900 کیلووات) که در خط نورد سرد این شرکت بکار گرفته شده بود.
+
+</p><p>
+
+گزینه‌های خارجی به دلیل قیمت‌های بسیار بالا و محدودیت‌های ناشی از تحریم، عملاً در دسترس نبودند. در همین راستا، مدیران و کارشناسان فنی فولاد غرب آسیا از خطوط تولید و توانمندی‌های شرکت جمکو بازدید کردند. این بازدید نقطه عطفی بود؛ جایی که آنان با اطمینان خاطر دریافتند مهندسان جمکو توانایی طراحی و ساخت الکتروموتور با مشخصات درخواستی را دارند.</p><p>
+
+نتیجه این همکاری، ساخت یک الکتروموتور 2200 کیلووات آب خنک بود که قابلیت نصب و کارکرد به جای هر سه موتور موجود را فراهم کرد. این موتور با امکان افزایش توان تا ۲ برابر، کارکرد دو جهته و سازگاری با VFD در فرکانس‌های مختلف، راهکاری پایدار و مطمئن برای تداوم تولید فولاد غرب شد.</p>
+
+<ul>
+<li>توان: 2200kw</li>
+<li>ولتاژ: 410</li>
+<li>قطب: 8</li>
+<li>فریم سایز: 710</li>
+
+</ul>
+
+<style>.h_iframe-aparat_embed_frame{position:relative;}.h_iframe-aparat_embed_frame .ratio{display:block;width:100%;height:auto;}.h_iframe-aparat_embed_frame iframe{position:absolute;top:0;left:0;width:100%;height:100%;}</style><div class="h_iframe-aparat_embed_frame"><span style="display: block;padding-top: 57%"></span><iframe src="https://www.aparat.com/video/video/embed/videohash/nml61q3/vt/frame?recom=self"  allowFullScreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe></div>
+
+'
+						>
+							<div class="badge">
+								<img src="assets/img/projects/f-gharb.png" />
+							</div>
+							<div class="label">فولاد غرب آسیا</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="70"
+							data-y="120"
+							data-image="assets/img/projects/foulad-khozestan.jpg"
+							data-desc="
+							
+							<ul>
+<li>توان: 560kw</li>
+<li>ولتاژ: 6600V</li>
+<li>قطب: 4</li>
+<li>فریم سایز: 450</li>
+
+</ul>
+"
+						>
+							<div class="badge">
+								<img
+									src="assets/img/projects/foulad-khouzestan.png"
+								/>
+							</div>
+							<div class="label">فولاد خوزستان</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="116"
+							data-y="66"
+							data-image="assets/img/projects/foulad-sabzevar.jpg"
+							data-desc="
+							<ul>
+<li>توان: 2600kw</li>
+<li>ولتاژ: 6600V</li>
+<li>قطب: 4</li>
+<li>فریم سایز: 560</li>
+
+</ul>"
+						>
+							<div class="badge">
+								<img
+									src="assets/img/projects/foulad-sabzvar.png"
+								/>
+							</div>
+							<div class="label">فولاد سبزوار</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="124"
+							data-y="85"
+							data-image="assets/img/projects/siman-sabzevar.jpg"
+							data-desc="
+							<ul>
+                <p>
+                  الکتروموتور 2600 کیلوواتی، 6.6 کیلووات، 4 قطب با فریم 560 برای کاربرد فن در شرکت سیمان سبزوار طراحی شده است. استفاده از روتور قفس سنجابی مسی (Copper Squirrel Cage) مزیت اصلی این موتور است؛ این ساختار به دلیل سادگی مکانیکی، استحکام بسیار بالا و نیاز به کمترین میزان تعمیر و نگهداری، مناسب ترین گزینه برای محیط‌های آلوده به گرد و غبار و سایش شدید محسوب می‌شود. راندمان بالای این موتور مطابق با استاندارد IEC60034-1، مصرف انرژی بهینه را در حین کارکرد مداوم (S1) تضمین می‌کند.
+                </p>
+<li>توان: 250kw</li>
+<li>ولتاژ: 6600V</li>
+<li>قطب: 4</li>
+<li>فریم سایز: 315</li>
+
+</ul>"
+						>
+							<div class="badge">
+								<img
+									src="assets/img/projects/siman-sabzevar.png"
+								/>
+							</div>
+							<div class="label">سیمان سبزوار</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="126"
+							data-y="70"
+							data-image="assets/img/projects/foulad-neshabour.jpg"
+							data-desc="
+              <p>
+                الکتروموتور 1700 کیلووات ، 6.6کیلووات ، 4 قطب در فریم 500 برای کاربردآسیاب مواد شرکت فولاد نیشابور طراحی شده است. نکته فنی مهم این است که روتور آن از نوع قفس سنجابی است؛ این ساختار مستلزم استفاده از کنترل‌کننده‌های الکترونیکی مانند Soft Starter یا VFD است تا جریان راه اندازی پایین در لحظه شروع به کار، مدیریت شود و  از موتورهای بزرگتر (مانند بسیاری از آسیاب‌های سیمان که از روتور سیم‌پیچی برای کنترل گشتاور راه‌اندازی استفاده می‌کنند) متمایز می‌سازد.
+              </p>
+              <p>
+               الکتروموتور 1300 کیلووات، 6.6 کیلوولت، 6 قطب و فریم 560، برای شرکت فولاد نیشابور طراحی شده است. این موتور دارای کلاس راندمان بالا برای بهینه‌سازی مصرف انرژی و قابلیت کارکرد در دمای محیطی 55 درجه سانتیگراد را دارد . همچنین دارای درجه حفاظت IP65 (مقاوم در برابر گرد و غبار و آب) بوده و روش راه‌اندازی آن به صورت Direct-On-Line (DOL) می‌با
+شد.  
+              </p>
+							<ul>
+<li>توان: 1700kw</li>
+<li>ولتاژ: 6600V</li>
+<li>قطب: 4</li>
+<li>فریم سایز: 500</li>
+
+</ul>"
+						>
+							<div class="badge">
+								<img
+									src="assets/img/projects/foulad-neyshabour.png"
+								/>
+							</div>
+							<div class="label">فولاد نیشابور</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="99"
+							data-y="75"
+							data-image="assets/img/projects/siman-faraz.jpg"
+							data-desc="
+
+              <p>
+                      الکتروموتور فشار قوی 3750 کیلوواتی جمکو با ولتاژ 6.3 کیلوولت و 6 قطب، محصولی سفارشی برای پروژه سیمان فراز فیروزکوه است که جایگزین مستقیم موتور ELIN اتریش شده است. این موتور با راندمان 96٪، طراحی ویژه IC511 و عملکرد دائم S1، برای سخت‌ترین شرایط کاری ساخته شده است. در بازهٔ زمانی تنها 120 روز توسط متخصصان جمکو طراحی و تولید شد تا توان واقعی صنعت داخلی را نشان دهد. سیستم خنک‌کاری سفارشی و روتور سیم‌پیچی، عملکرد پایدار آسیاب را تضمین می‌کند.
+      </p>
+
+							<ul>
+<li>توان: 3750</li>
+<li>ولتاژ: 6300V</li>
+<li>قطب: 6</li>
+<li>فریم سایز: 1000</li>
+
+</ul>"
+						>
+							<div class="badge">
+								<img
+									src="assets/img/projects/siman-faraz.png"
+								/>
+							</div>
+							<div class="label">سیمان فراز فیروزکوه</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="140"
+							data-y="95"
+							data-image="assets/img/projects/ghori-cement.jpg"
+							data-desc="
+						<p>	
+الکتروموتور فشار متوسط  630 کیلووات، 6 قطب، 6 کیلووات در فریم 680  رتور سیم پیچی با روتور سیم‌پیچی می باشد که توسط شرکت سیمان غوری افغانستان سفارش داده شده است. این موتورها ، برای تضمین کارایی بالا در فرآیندهای تولید سیمان آن مجتمع صنعتی طراحی و ساخته است . 
+</p>
+							<ul>
+<li>توان: 630kw</li>
+<li>ولتاژ: 6000V</li>
+<li>قطب: 6</li>
+<li>فریم سایز: 680</li>
+
+</ul>"
+						>
+							<div class="badge">
+								<img src="assets/img/projects/ghouri.png" />
+							</div>
+							<div class="label">سیمان غوری افغانستان</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="126"
+							data-y="55"
+							data-image="assets/img/projects/siman-turkamanestan.jpg"
+							data-desc="
+              <p>
+                این الکتروموتور با توان 2750 کیلووات، 6 قطب و ولتاژ 6.6 کیلوولت به سفارش شرکت سیمان ترکمنستان جهت کاربرد در آسیاب مواد توسط شرکت جمکو ساخته شده است. این طراحی دقیق همواره با حداکثر راندمان ، ساختار مستحکم و قطعات باکیفیت داخلی، عمر عملیاتی طولانی‌مدت را حتی در شرایط آسیاب مواد، محقق می‌سازد.
+              </p>
+							<ul>
+<li>توان: 2750kw</li>
+<li>ولتاژ: 6600V</li>
+<li>قطب: 6</li>
+<li>فریم سایز: 630</li>
+
+</ul>"
+						>
+							<div class="badge">
+								<img src="assets/img/pin.png" />
+							</div>
+							<div class="label">سیمان ترکمنستان</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="90"
+							data-y="128"
+							data-image="assets/img/projects/naft-shiraz.jpg"
+							data-desc="
+              <p>
+            این الکتروموتور به سفارش شرکت نفت شیراز و با تیپ ضد‌انفجاری سخت‌گیرانه طراحی و تولید شد. ویژگی‌های خاص مانند دمای محیط، ارتفاع از سطح دریا و فریم سایز منحصر‌به‌فرد، این پروژه را از سایر پروژه‌ها متمایز کرده است و اهمیت ویژه‌ای به آن بخشیده است.
+			</p>					
+		"
+						>
+							<div class="badge">
+								<img
+									src="assets/img/projects/naft-shiraz.png"
+								/>
+							</div>
+							<div class="label">نفت شیراز</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="57"
+							data-y="54"
+							data-image="assets/img/projects/pumpiran.jpg"
+							data-desc="
+              <p>
+         این الکتروموتور ۱۶۴۰ کیلووات که به سفارش شرکت پمپیران توسط شرکت جمکو طراحی شد، به دلیل راه‌اندازی با درایو و تعداد قطب بالا، یکی از اولین‌ها در پروژه‌های شرکت جمکو به شمار می‌رود.
+
+پس از تولید و انجام موفق تست‌ها و اخذ تأییدیه‌های لازم، این محصول به‌طور کامل به کارفرما تحویل گردید، که نمایانگر دقت فنی و توانمندی شرکت جمکو در تولید الکتروموتورهای پیشرفته است.	</p>
+					
+			  "
+						>
+							<div class="badge">
+								<img src="assets/img/projects/pump-iran.png" />
+							</div>
+							<div class="label">شرکت پمپیران</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="67"
+							data-y="109"
+							data-image="assets/img/projects/ab-ghadir.jpg"
+							data-desc="
+              <p>
+        
+		شرکت جمکو با طراحی و ساخت استارتر امکان راه‌اندازی ایمن الکتروموتورهای روتور سیم‌پیچی (دارای اسلیپ‌رینگ) را فراهم نموده است.
+
+اولین محصول استارتر جهت الکتروموتورهای ۲۵۰۰ کیلووات طرح آبرسانی غدیر تولید گردید.
+	</p>
+					
+			  "
+						>
+							<div class="badge">
+								<img src="assets/img/pin.png" />
+							</div>
+							<div class="label">آبرسانی غدیر</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="60"
+							data-y="90"
+							data-image="assets/img/projects/petroshimi-kermanshah.jpg"
+							data-desc="
+              <p>پروژه الکتروموتور ضدانفجار به سفارش شرکت پتروشیمی کرمانشاه، یکی از خاص‌ترین پروژه‌های شرکت جمکو در زمینه طراحی و ساخت الکتروموتورهای صنعتی است.
+
+ویژگی‌هایی مانند تعداد قطب و فریم سایز بالا، نصب عمودی و فلنجی بودن، این طراحی را به یک چالش فنی تبدیل کرده بود.
+
+با این حال، متخصصان جمکو توانستند این پروژه را با موفقیت به انجام رسانده و محصولی با بالاترین استانداردهای ایمنی و عملکرد تولید کنند.</p>		
+			  "
+						>
+							<div class="badge">
+								<img
+									src="assets/img/projects/pet-kermanshah.png"
+								/>
+							</div>
+							<div class="label">پتروشیمی کرمانشاه</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="70"
+							data-y="99"
+							data-image="assets/img/projects/forouzandeh.jpg"
+							data-desc="
+              <p>
+				الکتروموتور ۱۹۰ کیلووات طراحی‌شده توسط شرکت جمکو به سفارش شرکت ساختمانی فروزنده، برای استفاده در ایستگاه نمک‌زدایی آب‌های آزاد ساخته شد.
+
+طراحی منحصربه‌فرد تاب کاور این الکتروموتور، آن را به یکی از پروژه‌های ویژه و برجسته تبدیل کرده است.
+
+این پروژه نشان‌دهنده توانمندی‌های فنی و طراحی نوآورانه تیم مهندسی جمکو در حل چالش‌های خاص صنعتی است.
+			  </p>"
+						>
+							<div class="badge">
+								<img
+									src="assets/img/projects/forouzandeh.png"
+								/>
+							</div>
+							<div class="label">شرکت ساختمانی فروزنده</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="81"
+							data-y="72"
+							data-image="assets/img/projects/havayar.jpg"
+							data-desc="
+							<h2>الکتروموتور‌های ایستگاه CNG</h2>
+              <p>
+			الکتروموتور ضدانفجار با توان ۲۲۰ کیلووات به سفارش شرکت هوایار توسط جمکو طراحی و تولید شده است.
+
+این محصول به‌عنوان جایگزینی برای الکتروموتورهای برند نمونه برزیلی طراحی شده است.
+
+تیپ ضدانفجاری این موتور از سخت‌گیرانه‌ترین کلاس‌های استاندارد ایمنی برخوردار است و عملکردی مطمئن در محیط‌های پرخطر فراهم می‌کند.
+  </p>"
+						>
+							<div class="badge">
+								<img src="assets/img/projects/havayar.png" />
+							</div>
+							<div class="label">شرکت هوایار</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="52"
+							data-y="50"
+							data-image="assets/img/projects/yekanat.jpg"
+							data-desc="
+							<h2>آبرسانی به دشت‌های تشنه و تأمین آب شرب برای مردم مرند</h2>
+              <p>
+	
+
+پروژه آبرسانی به دشت‌های «هرزندات» و «یکانات» شهرستان مرند با هدف حل بحران کمبود آب کشاورزی و شرب در بیش از ۱۵ هزار هکتار از اراضی این منطقه اجرا شده است.
+
+این طرح موجب تأمین آب شرب برای ۸ شهر و ۸۱ روستا و آبیاری دشت‌های حاصلخیز می‌شود.
+
+برای تکمیل این پروژه، ۴ دستگاه الکتروموتور ۲٫۲ مگاوات توسط مهندسین شرکت جمکو طراحی و تولید شد که به‌عنوان یکی از دستاوردهای مهم صنعتی، به ارتقای زیرساخت‌های آبی و کشاورزی در این منطقه کمک شایانی کرده است. </p>"
+						>
+							<div class="badge">
+								<img src="assets/img/pin.png" />
+							</div>
+							<div class="label">پروژه یکانات</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="57"
+							data-y="44"
+							data-image="assets/img/projects/karamabad.jpg"
+							data-desc="
+							<h2>الکتروموتورهای پرتوان برای قلب تشنه فلات مرکزی ایران</h2>
+              <p>
+الکتروموتورهای پرتوان، نقشی کلیدی در شرکت دانش‌بنیان جمکو با طراحی و ساخت الکتروموتورهای ۲۷۰ کیلووات، ایفا می‌کند. این موتورهای پرتوان، در سه پروژه ملی انتقال آب از خلیج فارس به فلات مرکزی ایفا می‌کنند. هزاران مترمکعب آب را از سواحل جنوبی تا عمق کویر مرکزی کشور جابه‌جا می‌کنند.
+
+تا پیش از این، چنین تجهیزاتی تنها از مسیر واردات قابل تأمین بود. اما امروز، جمکو با اتکا به تخصص داخلی، این نیاز راهبردی را در دل تحریم‌ها پاسخ داده و مسیر آبرسانی سرزمین را با توان ایرانی هموار کرده است.
+
+			  </p>
+	
+"
+						>
+							<div class="badge">
+								<img src="assets/img/pin.png" />
+							</div>
+							<div class="label">پروژه سد کرم‌آباد</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="112"
+							data-y="155"
+							data-image="assets/img/projects/wasco.jpg"
+							data-desc="
+							<h2>الکتروموتورهای پرتوان برای قلب تپنده فلات مرکزی ایران</h2>
+              <p>
+				شرکت دانش‌بنیان جمکو با طراحی و ساخت الکتروموتورهای ۲۷۰۰ کیلووات، نقشی کلیدی در پروژه ملی انتقال آب از خلیج فارس به فلات مرکزی ایفا می‌کند.
+
+این موتورها‌ی پرتوان، در سه فاز مجزا، هزاران مترمکعب آب را از سواحل جنوبی تا عمق کویر مرکزی کشور جابه‌جا می‌کنند.
+
+تا پیش از این، چنین تجهیزاتی تنها از مسیر واردات قابل تأمین بود. اما امروز، جمکو با اتکا به تخصص داخلی، این نیاز راهبردی را در دل تحریم‌ها پاسخ داده و مسیر آبادانی سرزمین را با توان ایرانی هموار کرده است.
+			  </p>"
+						>
+							<div class="badge">
+								<img src="assets/img/pin.png" />
+							</div>
+							<div class="label">پروژه انتقال آب واسکو</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="67"
+							data-y="84"
+							data-image="assets/img/projects/ab-hamedan.jpg"
+							data-desc="
+							<h2>الکتروموتورهای پرتوان برای قلب تپنده فلات مرکزی ایران</h2>
+              <p>
+			پروژه آبرسانی بلندمدت به همدان طرحی است که کارشناسان می گویند اجرای کامل آن بهترین، مناسب ترین و راهگشاترین راه حل برون رفت دیار الوند از خشکسالی است که پس از حدود ۱۸ سال رو به تکمیل شدن است؛ هم اینک آب به شبکه آبرسانی شهر متصل و میزان قطعی ‌های شبکه به میزان قابل توجهی کاهش یافته است. طراحی و تولید الکتروموتورهای مورد نیاز طرح آبرسانی به همدان با توجه به پیچیدگی و خاص بودن آن به شرکت دانش‌بنیان جمکو واگذار شد.</p><p> تعداد ۲۸ دستگاه الکتروموتور جهت طرح آبرسانی به همدان، مورد نیاز می باشد که تاکنون 16 دستگاه آن تولید و ارسال شده است. تولید هر دستگاه الکتروموتور برای استفاده در طرح‌های آبرسانی، ۲۰ روز طول می کشد اما به منظور تسریع در روند طرح آبرسانی از سد تالوار به همدان، با تلاش شبانه روزی مهندسان و متخصصان مجموعه شرکت صنایع ماشین های الکتریکی جوین (جمکو) هر ۲روز یک دستگاه از این الکتروموتورها تولید می شود که این نیز خود دستاوردی در زمینه تولیدات دانش بنیان شرکت جمکو می باشد. طرح آبرسانی بلندمدت و یا آبرسانی بین حوضه ای تالوار به همدان به طول ۱۴۰ کیلومتر است که با اجرای این طرح، آب درازمدت ۱۲ شهر همدان و ۱۵۹ روستا تامین می شود.
+
+			
+			</p>"
+						>
+							<div class="badge">
+								<img src="assets/img/pin.png" />
+							</div>
+							<div class="label">آب‌رسانی همدان</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="p2"
+							data-group="projects"
+							data-x="64"
+							data-y="128"
+							data-image="assets/img/projects/ramile.jpg"
+							data-desc="
+							<h2>ابتکار صنعتی و نوآوری در تولید الکتروموتور‌های پیشرفته</h2>
+              <p>
+	برای اولین بار در ایران در سال تولید ،پشتیبانی و مانع زدایی ها شرکت جمکو موفق به تولید الکتروموتورهای دو سرعته و دو توانه گردید.
+این مدل از الکتروموتورها به سفارش شرکت مپنا برای نیروگاه برق رمیله عراق تولید شده است که میزان کل سفارش از این مدل الکتروموتور 100 دستگاه میباشد که 33 دستگاه آن ابلاغ و طی دو مرحله تولید و تحویل میگردد.
+تولیدات فاز نخست این پروژه که شامل 16 دستگاه الکتروموتور 132/18.5 KW  دو سرعته و دو توانه میباشد، که اولین سری آن همزمان با آغاز دهه فجر انقلاب اسلامی تحویل پیمانکار نیروگاه رمیله عراق گردید
+			  </p>	"
+						>
+							<div class="badge">
+								<img src="assets/img/projects/mapna.png" />
+							</div>
+							<div class="label">نیروگاه رمیله</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="office"
+							data-type="office"
+							data-group="fixed"
+							data-image="assets/img/jemco1.jpg"
+							data-desc="
+							<p>جمکو، با سابقه‌ای درخشان در طراحی و تولید الکتروموتور، به‌عنوان مجموعه‌ای پیشتاز در صنعت کشور فعالیت می‌کند. تکیه بر دانش تخصصی، زیرساخت‌های فوق پیشرفته و رعایت استانداردهای بین‌المللی، جمکو را به قدرتی عظیم در بازارهای صنعتی داخلی و منطقه‌ای تبدیل کرده است.</p>
+							<p>شرکت ماشین‌های الکتریکی جوین (جمکو) در سال ۱۳۶۹ با هدف کاهش وابستگی صنایع داخلی به منابع خارجی، در شهرستان سبزوار تأسیس شد. این شرکت با بهره‌گیری از نیروهای متخصص و تجهیزات پیشرفته، طراحی، ساخت، تست و تعمیر انواع الکتروموتورها و ژنراتورها را به‌صورت کامل بر عهده دارند.</p>
+
+							<br/>
+						<h3>	چشم‌انداز جمکو</h3>
+<p>جمکو با هدف تولید محصولات برتر در ایران و خاورمیانه، رویکردی مبتنی بر کیفیت، نوآوری و رقابت‌پذیری دارد. از این رو، توانسته است جایگاهی قابل‌اعتماد در بازار منطقه به دست آورد.</p>
+<p>استفاده از مواد اولیه با استانداردهای بین‌المللی، بهره‌مندی از تجهیزات پیشرفته، کنترل کیفی دقیق در مراحل تولید و برخورداری از نیروی انسانی متخصص، نمایانگر تعهد جمکو به ارائة محصولاتی هم‌تراز با کیفیت جهانی و حفظ جایگاه خود به‌عنوان برند برتر صنعتی است.</p>
+
+<style>.h_iframe-aparat_embed_frame{position:relative;}.h_iframe-aparat_embed_frame .ratio{display:block;width:100%;height:auto;}.h_iframe-aparat_embed_frame iframe{position:absolute;top:0;left:0;width:100%;height:100%;}</style><div class='h_iframe-aparat_embed_frame'><span style='display: block;padding-top: 57%'></span><iframe src='https://www.aparat.com/video/video/embed/videohash/kyrbocp/vt/frame'  allowFullScreen='true' webkitallowfullscreen='true' mozallowfullscreen='true'></iframe></div>
+							"
+							data-x="90"
+							data-y="81"
+						>
+							<div class="badge">
+								<img src="assets/img/office.png" />
+							</div>
+							<div class="label">دفتر مرکزی جمکو</div>
+						</div>
+
+						<div
+							class="marker"
+							data-id="factory"
+							data-type="factory"
+							data-group="fixed"
+							data-image="assets/img/jemco-factory.jpg"
+							data-x="118"
+							data-y="77"
+							data-desc='<p>
+
+								الکتروموتورها و ژنراتورهای جمکو مطابق با استانداردهای بین المللی و سازمان ملی استاندارد ایران هستند.
+همچنین، جمکو در راستای بهبود فرهنگ مشتری مداری جدیدترین طر ح ها و مواد را به کار می‌برد تا بهترین عملکرد
+الکتریکی و مکانیکی را ارائه دهد. در طول سه دهۀ گذشته، همراه با گسترش صنعت، این شرکت نیز رشد چشمگیری
+داشته است و با ۵۰۰ نفر نیروی کار، از جمله ۱۷۴ متخصص، ۱۲ واحد تولیدی و خدمات پشتیبانی متمرکز، به عنوان
+سازمانی حرفه‌ای مدیریت می شود و محصولات گسترده‌ای را در سطح ملی، به طور مستقیم، در تارنمای اینترنتی و همچنین
+از طریق نمایندگیها به فروش می رساند.
+							</p>
+							<img class="inline-popup-image" src="assets/img/factory1.jpg"/>
+							<p>
+شرکت جمکو افزون بر تأییدیۀ استاندارد ملی ایران و اتحادیۀ اروپا (CE)، تأییدیۀ ATEX را از شرکت ECM ایتالیا برای
+الکتروموتورهای ضدانفجار و تأییدیه شرکت DEDAL بلغارستان را برای الکتروموتورهای استخراج دود دریافت کرده است. بر
+این اساس، همۀ الکتروموتورها و ژنراتورهای این شرکت بدون هرگونه محدودیت جغرافیایی امکان استفاده در سطح ملی
+و بین المللی را دارند. همچنین، شرکت جمکو در سال ۱۴۰۱ موفق شد عنوان «دانش‌بنیان» را از سوی معاونت علمی
+ریاست جمهوری دریافت کند. این ویژگی‌ها، انگیزۀ لازم را به شرکت جمکو داده است تا به تولیدکننده ای جهانی در
+صنعت الکتروموتور تبدیل شود. همچنین شرکت جمکو در راستای بهبود فرهنگ مشتری مداری اقدام به ارائه خدمات
+پس از فروش به صورت 24 ساعته کرده است
+							</p>
+              <style>.h_iframe-aparat_embed_frame{position:relative;}.h_iframe-aparat_embed_frame .ratio{display:block;width:100%;height:auto;}.h_iframe-aparat_embed_frame iframe{position:absolute;top:0;left:0;width:100%;height:100%;}</style><div class="h_iframe-aparat_embed_frame"><span style="display: block;padding-top: 57%"></span><iframe src="https://www.aparat.com/video/video/embed/videohash/zrmpw9j/vt/frame?recom=self"  allowFullScreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe></div>
+              '
+						>
+							<div class="badge">
+								<img src="assets/img/factory.png" />
+							</div>
+							<div class="label">کارخانه جمکو</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- popup root placed outside of the map viewport so its scrolling isn't
+		     intercepted by map pan/zoom handlers -->
+		<div id="popupRoot"></div>
+
+		<!-- Toast container -->
+		<div id="toast" class="toast"></div>
+
+		<script>
+			// Toast notification function
+			function showToast(message, isError = false) {
+				const toast = document.getElementById("toast");
+				toast.textContent = message;
+				toast.classList.toggle("error", isError);
+				toast.classList.add("show");
+
+				// Hide toast after 3 seconds
+				setTimeout(() => {
+					toast.classList.remove("show");
+				}, 3000);
+			}
+			const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+			// --- Theme toggle (dark/light mode) ---
+			const themeToggle = document.getElementById("theme-toggle");
+			function initTheme() {
+				const savedTheme = localStorage.getItem("theme") || "light";
+				document.documentElement.classList.toggle(
+					"light-mode",
+					savedTheme === "light"
+				);
+			}
+			function toggleTheme() {
+				const isLightMode =
+					document.documentElement.classList.toggle("light-mode");
+				const theme = isLightMode ? "light" : "dark";
+				localStorage.setItem("theme", theme);
+			}
+			initTheme();
+			if (themeToggle) themeToggle.addEventListener("click", toggleTheme);
+
+			const mapInner = document.getElementById("mapInner");
+			const mapImage = document.getElementById("mapImage");
+			const viewport = document.getElementById("viewport");
+			let state = {
+				scale: 1,
+				minScale: 0.5,
+				maxScale: 1.5,
+				translateX: 0,
+				translateY: 0,
+				dragging: false,
+				lastMouse: { x: 0, y: 0 },
+			};
+			function updateTransform() {
+				mapInner.style.transform = `translate(-50%,-50%) translate(${state.translateX}px, ${state.translateY}px) scale(${state.scale})`;
+			}
+
+			function positionMarkers() {
+				const markers = mapInner.querySelectorAll(".marker");
+				const rect = mapImage.getBoundingClientRect();
+				const width = rect.width;
+				const height = rect.height;
+				markers.forEach((m) => {
+					const dx = parseFloat(m.dataset.x) || 0;
+					const dy = parseFloat(m.dataset.y) || 0;
+					const left = (dx / 100) * width;
+					const top = (dy / 100) * height;
+					m.style.left = left + "px";
+					m.style.top = top + "px";
+				});
+			}
+			function onImageReady() {
+				const rect = mapImage.getBoundingClientRect();
+				mapInner.style.width = rect.width + "px";
+				mapInner.style.height = rect.height + "px";
+				positionMarkers();
+
+				const initialScale = 0.4; // 1 = default display size; >1 zooms in, <1 zooms out
+				state.scale = clamp(
+					initialScale,
+					state.minScale,
+					state.maxScale
+				);
+				state.translateX = 0; // optional: center on map
+				state.translateY = 0;
+				updateTransform();
+			}
+			window.addEventListener("resize", onImageReady);
+			if (mapImage.complete) onImageReady();
+			else mapImage.addEventListener("load", onImageReady);
+
+			viewport.addEventListener("mousedown", (e) => {
+				if (e.button !== 0) return;
+				state.dragging = true;
+				state.lastMouse = { x: e.clientX, y: e.clientY };
+				viewport.style.cursor = "grabbing";
+			});
+			window.addEventListener("mouseup", () => {
+				state.dragging = false;
+				viewport.style.cursor = "";
+			});
+			window.addEventListener("mousemove", (e) => {
+				if (!state.dragging) return;
+				const dx = e.clientX - state.lastMouse.x;
+				const dy = e.clientY - state.lastMouse.y;
+				state.lastMouse = { x: e.clientX, y: e.clientY };
+				state.translateX += dx;
+				state.translateY += dy;
+				limitPan();
+				updateTransform();
+			});
+
+			viewport.addEventListener(
+				"wheel",
+				(e) => {
+					e.preventDefault();
+					const delta = -e.deltaY * 0.0015;
+					zoomAt(e.clientX, e.clientY, 1 + delta);
+				},
+				{ passive: false }
+			);
+			function zoomAt(clientX, clientY, zoomFactor) {
+				const oldScale = state.scale;
+				const newScale = clamp(
+					oldScale * zoomFactor,
+					state.minScale,
+					state.maxScale
+				);
+
+				if (newScale === oldScale) return;
+
+				// Map element rect (screen coords)
+				const mapRect = mapInner.getBoundingClientRect();
+
+				// offset of pointer inside map (screen px)
+				const offsetX = clientX - mapRect.left;
+				const offsetY = clientY - mapRect.top;
+
+				// compute local (unscaled) coordinate of pointer relative to map image origin
+				const localX = (offsetX - state.translateX) / oldScale;
+				const localY = (offsetY - state.translateY) / oldScale;
+
+				// compute new translate so newScale * local + newTranslate = offset
+				state.translateX = offsetX - newScale * localX;
+				state.translateY = offsetY - newScale * localY;
+
+				state.scale = newScale;
+				limitPan();
+				updateTransform();
+			}
+			function limitPan() {
+				const mapRect = mapInner.getBoundingClientRect();
+				const vpRect = viewport.getBoundingClientRect();
+				const scaledW = mapRect.width;
+				const scaledH = mapRect.height;
+				state.translateX = clamp(
+					state.translateX,
+					-scaledW * 2,
+					scaledW * 2
+				);
+				state.translateY = clamp(
+					state.translateY,
+					-scaledH * 2,
+					scaledH * 2
+				);
+			}
+
+			// touch
+			let lastTouchDist = null;
+			let lastTouchCenter = null;
+			viewport.addEventListener(
+				"touchstart",
+				(e) => {
+					if (e.touches.length === 1) {
+						state.dragging = true;
+						state.lastMouse = {
+							x: e.touches[0].clientX,
+							y: e.touches[0].clientY,
+						};
+					} else if (e.touches.length === 2) {
+						state.dragging = false;
+						lastTouchDist = distance(e.touches[0], e.touches[1]);
+						lastTouchCenter = centerPoint(
+							e.touches[0],
+							e.touches[1]
+						);
+					}
+				},
+				{ passive: true }
+			);
+			viewport.addEventListener(
+				"touchmove",
+				(e) => {
+					if (e.touches.length === 1 && state.dragging) {
+						const t = e.touches[0];
+						const dx = t.clientX - state.lastMouse.x;
+						const dy = t.clientY - state.lastMouse.y;
+						state.lastMouse = { x: t.clientX, y: t.clientY };
+						state.translateX += dx;
+						state.translateY += dy;
+						limitPan();
+						updateTransform();
+					} else if (e.touches.length === 2) {
+						const d = distance(e.touches[0], e.touches[1]);
+						const c = centerPoint(e.touches[0], e.touches[1]);
+						if (lastTouchDist) {
+							const factor = d / lastTouchDist;
+							zoomAt(c.clientX, c.clientY, factor);
+						}
+						lastTouchDist = d;
+						lastTouchCenter = c;
+					}
+				},
+				{ passive: false }
+			);
+			viewport.addEventListener(
+				"touchend",
+				(e) => {
+					if (e.touches.length === 0) {
+						state.dragging = false;
+						lastTouchDist = null;
+						lastTouchCenter = null;
+					}
+				},
+				{ passive: true }
+			);
+			function distance(a, b) {
+				return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+			}
+			function centerPoint(a, b) {
+				return {
+					clientX: (a.clientX + b.clientX) / 2,
+					clientY: (a.clientY + b.clientY) / 2,
+				};
+			}
+
+			// popup + sounds
+			const popupRoot = document.getElementById("popupRoot");
+			const clickAudio = document.getElementById("clickAudio");
+
+			mapInner.addEventListener("click", (e) => {
+				const marker = e.target.closest(".marker");
+				if (!marker) return;
+				e.stopPropagation();
+				openPopupFor(marker);
+			});
+			window.addEventListener("click", () => {
+				/* clicking outside closes popup */ if (
+					!popupRoot.querySelector(".popup-full-backdrop")
+				)
+					return;
+				closePopup();
+			});
+
+			function openPopupFor(marker) {
+				closePopup();
+				// play click/open sound if available
+				try {
+					clickAudio.currentTime = 0;
+					clickAudio.play().catch(() => {});
+				} catch (e) {}
+
+				const id = marker.dataset.id || "unknown";
+				const title =
+					(marker.querySelector(".label") || {}).textContent || id;
+				const imageSrc = marker.dataset.image || "";
+				const desc = marker.dataset.desc || "بدون توضیحات";
+
+				const markerUrl = (marker.dataset.url || "").trim();
+				let html = "";
+				if (markerUrl) {
+					html = `
+      					<div class="popup-full-backdrop popup-animate" data-marker="${id}">
+      					  <div class="popup-full popup-iframe">
+      					    <div class="close" id="popupClose">✕</div>
+      					    <iframe src="${markerUrl}" frameborder="0" allowfullscreen style="width:100%;height:100%;border:0;border-radius:12px;"></iframe>
+      					  </div>
+      					</div>
+      					`;
+				} else {
+					html = `
+      				        <div class="popup-full-backdrop popup-animate" data-marker="${id}">
+      				          <div class="popup-full">
+      				            <div class="popup-left">
+      				              ${
+										imageSrc
+											? `<img src="${imageSrc}" alt="${title}">`
+											: `<div style="color:var(--muted);text-align:center;padding:22px;">بدون تصویر</div>`
+									}
+      				            </div>
+      				            <div class="popup-right">
+      				              <div class="close" id="popupClose">✕</div>
+      				              <h2>${title}</h2>
+      				              <p>${desc}</p>
+      				            </div>
+      				          </div>
+      				        </div>
+      				      `;
+				}
+
+				popupRoot.innerHTML = html;
+				const backdrop = popupRoot.querySelector(
+					".popup-full-backdrop"
+				);
+				const popupFullEl = popupRoot.querySelector(".popup-full");
+				if (popupFullEl) {
+					popupFullEl.addEventListener(
+						"wheel",
+						(ev) => ev.stopPropagation(),
+						{
+							passive: false,
+						}
+					);
+					popupFullEl.addEventListener(
+						"touchstart",
+						(ev) => ev.stopPropagation(),
+						{ passive: true }
+					);
+					popupFullEl.addEventListener(
+						"touchmove",
+						(ev) => ev.stopPropagation(),
+						{ passive: false }
+					);
+				}
+				// prevent event trickle closing when clicking inside
+				backdrop.addEventListener("click", (ev) => {
+					if (ev.target === backdrop) closePopup();
+				});
+				const closeBtn = popupRoot.querySelector("#popupClose");
+				if (closeBtn)
+					closeBtn.addEventListener("click", (ev) => {
+						ev.stopPropagation();
+						closePopup();
+					});
+
+				// Prevent map pan/zoom while interacting with popup scroll area
+				const popupRight = popupRoot.querySelector(".popup-right");
+				if (popupRight) {
+					// stop wheel events from reaching the viewport/map
+					popupRight.addEventListener(
+						"wheel",
+						(ev) => {
+							ev.stopPropagation();
+						},
+						{ passive: false }
+					);
+
+					// for touch devices, stop touchmove propagation when touching the popup
+					popupRight.addEventListener(
+						"touchstart",
+						(ev) => {
+							ev.stopPropagation();
+						},
+						{ passive: true }
+					);
+					popupRight.addEventListener(
+						"touchmove",
+						(ev) => {
+							ev.stopPropagation();
+						},
+						{ passive: false }
+					);
+				}
+
+				// animate transform for map to focus on marker (optional subtle zoom)
+				// play an extra short flourish sound if desired (re-using clickAudio)
+			}
+			function closePopup() {
+				popupRoot.innerHTML = "";
+			}
+
+			let ro = new ResizeObserver(() => {
+				onImageReady();
+			});
+			ro.observe(mapImage);
+
+			(function starfield() {
+				const c = document.getElementById("stars");
+				const ctx = c.getContext("2d");
+				let w,
+					h,
+					stars = [];
+				function resize() {
+					w = innerWidth;
+					h = innerHeight;
+					c.width = w;
+					c.height = h;
+					init();
+				}
+				function init() {
+					stars = [];
+					for (let i = 0; i < 120; i++) {
+						stars.push({
+							x: Math.random() * w,
+							y: Math.random() * h,
+							r: Math.random() * 1.6 + 0.2,
+							a: Math.random() * 0.9,
+						});
+					}
+				}
+				function draw() {
+					ctx.clearRect(0, 0, w, h);
+					for (const s of stars) {
+						ctx.globalAlpha = s.a;
+						ctx.beginPath();
+						ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+						ctx.fillStyle = "#8ab6ff";
+						ctx.fill();
+					}
+				}
+				window.addEventListener("resize", resize);
+				resize();
+				function loop() {
+					for (const s of stars) {
+						s.x += (Math.random() - 0.5) * 0.4;
+						s.y += (Math.random() - 0.5) * 0.4;
+						s.a = 0.6 + Math.sin(Date.now() / 1000 + s.x) * 0.3;
+					}
+					draw();
+					requestAnimationFrame(loop);
+				}
+				loop();
+			})();
+
+			window.addMarker = function (opts) {
+				const el = document.createElement("div");
+				el.className = "marker";
+				el.dataset.id = opts.id || "m" + Date.now();
+				el.dataset.x = opts.x || 0;
+				el.dataset.y = opts.y || 0;
+				el.dataset.group = opts.group || "projects";
+				if (opts.type) el.dataset.type = opts.type;
+				if (opts.image) el.dataset.image = opts.image;
+				if (opts.desc) el.dataset.desc = opts.desc;
+				el.innerHTML = `<div class="badge">${(
+					opts.label ||
+					opts.id ||
+					"M"
+				).slice(0, 2)}</div><div class="label">${
+					opts.label || opts.id
+				}</div>`;
+				mapInner.appendChild(el);
+				onImageReady();
+				applyToggles();
+				return el;
+			};
+
+			// Portrait/tall-screen popup stacking: ensure image on top, text below
+			(function () {
+				const STYLE_ID = "portrait-popup-fix-inline";
+				function injectPortraitCSS() {
+					if (document.getElementById(STYLE_ID)) return;
+					const css = `\
+		/* Portrait popup stacking: image on top, text below */\
+		html.portrait .popup-full {\
+			display: flex !important;\
+			flex-direction: column !important;\
+			align-items: stretch !important;\
+			width: min(96vw, 760px) !important;\
+			max-height: 80vh !important;\
+			box-sizing: border-box !important;\
+		}\
+		html.portrait .popup-full .popup-left {\
+			width: 100% !important;\
+			order: 0 !important;\
+			flex: 0 0 auto !important;\
+			height: var(--popup-img-h, 25vh) !important;\
+			max-height: var(--popup-img-h, 30vh) !important;\
+			box-sizing: border-box !important;\
+		}\
+		html.portrait .popup-full .popup-left img {\
+			width: 100% !important;\
+			height: 100% !important;\
+			object-fit: cover !important;\
+			display: block !important;\
+		}\
+		html.portrait .popup-full .popup-right {\
+			width: 100% !important;\
+			order: 1 !important;\
+			flex: 1 1 auto !important;\
+			min-height: 0 !important; /* allow flex children to shrink and enable overflow */\
+			overflow-y: auto !important;\
+			-webkit-overflow-scrolling: touch !important;\
+			padding: 1rem !important;\
+			box-sizing: border-box !important;\
+		}\
+		html.portrait .popup-full .popup-right * {\
+			touch-action: auto !important;\
+		}\
+		`;
+					const s = document.createElement("style");
+					s.id = STYLE_ID;
+					s.appendChild(document.createTextNode(css));
+					document.head.appendChild(s);
+				}
+
+				function removePortraitCSS() {
+					const s = document.getElementById(STYLE_ID);
+					if (s) s.remove();
+				}
+
+				function setPortraitClass(enabled) {
+					if (enabled)
+						document.documentElement.classList.add("portrait");
+					else document.documentElement.classList.remove("portrait");
+				}
+
+				function checkAndApplyPortrait() {
+					const isPortrait = window.innerHeight > window.innerWidth;
+					if (isPortrait) {
+						injectPortraitCSS();
+						setPortraitClass(true);
+					} else {
+						setPortraitClass(false);
+						removePortraitCSS();
+					}
+				}
+
+				checkAndApplyPortrait();
+				window.addEventListener("resize", checkAndApplyPortrait);
+				window.addEventListener("orientationchange", () =>
+					setTimeout(checkAndApplyPortrait, 120)
+				);
+			})();
+		</script>
+	</body>
+</html>
